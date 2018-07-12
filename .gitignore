@@ -1,0 +1,5 @@
+/packages
+/.vs
+/src/GroupDocs.Viewer.MVC.csproj.user
+/src/bin
+/src/obj

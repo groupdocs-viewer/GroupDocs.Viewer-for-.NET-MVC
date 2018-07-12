@@ -1,13 +1,15 @@
-﻿using Viewer.Config;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace Viewer.Controllers
+namespace GroupDocs.Viewer.MVC.Controllers
 {
+    /// <summary>
+    /// Viewer Web page controller
+    /// </summary>
     public class ViewerController : Controller
-    {
+    {       
         public ActionResult Index()
         {
-          return View("Viewer");
+            return View();
         }
     }
 }

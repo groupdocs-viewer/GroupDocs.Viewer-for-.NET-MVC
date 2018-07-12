@@ -1,6 +1,6 @@
 ﻿using System.Web.Http;
 
-namespace Viewer
+namespace GroupDocs.Viewer.MVC
 {
     public static class WebApiConfig
     {
@@ -10,13 +10,7 @@ namespace Viewer
             config.EnableCors();
 
             // Web API routes
-            config.MapHttpAttributeRoutes();
-          
-            config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "{action}",
-                defaults: new { controller = "ViewerApiController" }
-            );
+            config.MapHttpAttributeRoutes();              
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace Viewer
+namespace GroupDocs.Viewer.MVC
 {
     public class FilterConfig
     {
