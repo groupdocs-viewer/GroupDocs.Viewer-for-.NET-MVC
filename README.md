@@ -1,6 +1,6 @@
 ![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/master/src/Resources/viewer/images/banner.png "GroupDocs.Viewer")
 # GroupDocs.Viewer for .NET MVC Example
-###### version 1.0.1
+###### version 1.1.0
 
 
 ## System Requirements
@@ -18,7 +18,7 @@ Thanks to powerful and flexible [GroupDocs.Viewer for .NET](https://products.gro
 
 
 ## Demo Video
-Coming soon
+https://www.youtube.com/watch?v=pA98PkdXcN8
 
 
 ## Features
