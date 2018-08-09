@@ -357,7 +357,7 @@ NAV BAR CONTROLS
 					offsetTop: 150
 				});
 				// check if this is last rearch result instance
-				if(search_position >= getViewerSearchMatches()){
+				if(search_position >= getTotalSearchMatches()){
 					// deactivate next button
 				}else{
 					// increment search position
@@ -368,7 +368,7 @@ NAV BAR CONTROLS
 			}
 			count++;
 		});
-		setSearchMatchCount(search_position, getViewerSearchMatches());
+		setSearchMatchCount(search_position, getTotalSearchMatches());
 	});
 
 	//////////////////////////////////////////////////
@@ -402,7 +402,7 @@ NAV BAR CONTROLS
 			// store last instance
 			prev = $(this);
 		});
-		setSearchMatchCount(search_position, getViewerSearchMatches());
+		setSearchMatchCount(search_position, getTotalSearchMatches());
 	});
 
 	//////////////////////////////////////////////////
@@ -772,9 +772,9 @@ function generatePagesTemplate(data, totalPageNumber, prefix){
 		// loop though pages
 		$.each(data, function(index, elem){
 			// set document description
-			var pageNumber = elem.Number;
-			var pageWidth = elem.Width;
-			var pageHeight = elem.Height;
+			var pageNumber = elem.number;
+			var pageWidth = elem.width;
+			var pageHeight = elem.height;
 			// append empty page
 			$('#gd-' + prefix + 'panzoom').append(
 				'<div id="gd-' + prefix + 'page-' + pageNumber + '" class="gd-page" style="min-width: ' + pageWidth + 'px; min-height: ' + pageHeight + 'px;">'+
@@ -794,13 +794,13 @@ function generatePagesTemplate(data, totalPageNumber, prefix){
 			if(preloadPageCount > 0){
 				for(var i = 0; i < counter; i++){
 					// render page
-					appendHtmlContent(i + 1, documentGuid, '', data[i].Width, data[i].Height);
+					appendHtmlContent(i + 1, documentGuid, '', data[i].width, data[i].height);
 				}
 
 			} else {
 				// get all pages
 				for(var i = 0; i < totalPageNumber; i++){
-					appendHtmlContent(i + 1, documentGuid, '', data[i].Width, data[i].Height);
+					appendHtmlContent(i + 1, documentGuid, '', data[i].width, data[i].height);
 				}
 			}
 		} else {
@@ -808,7 +808,7 @@ function generatePagesTemplate(data, totalPageNumber, prefix){
 			// this is required to fix issue with thumbnails resolution
 			isPageLoaded($('#gd-page-1')).then(function(element) {
 				for(var i = 0; i < totalPageNumber; i++){
-					appendHtmlContent(i + 1, documentGuid, 'thumbnails-', data[i].Width, data[i].Height);
+					appendHtmlContent(i + 1, documentGuid, 'thumbnails-', data[i].width, data[i].height);
 				}
 			});
 		}
@@ -1115,7 +1115,7 @@ function highlightSearch(text) {
 		    // update to new content
 		    $this.replaceWith(content);
 		});
-		var totalSearchMatches = getViewerSearchMatches();
+		var totalSearchMatches = getTotalSearchMatches();
 		setSearchMatchCount(0, totalSearchMatches);
 		if(totalSearchMatches > 0){
 		    $('#gd-nav-search-next').click();
@@ -1162,7 +1162,7 @@ function getZoomValue(){
 /**
 * Get total matches count from search
 */
-function getViewerSearchMatches(){
+function getTotalSearchMatches(){
     return $('.gd-highlight').length;
 }
 
