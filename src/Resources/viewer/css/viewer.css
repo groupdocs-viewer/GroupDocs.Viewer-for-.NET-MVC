@@ -322,8 +322,10 @@ Thumbnails sidebar
     display: block;
 }
 #gd-thumbnails-panzoom {
-    zoom: 0.25;
-    zoom: 25%;
+    transform: scale(0.25);
+    transform-origin: 25% 0px 0px;
+    left: 15px;
+    margin-left: -57px;
 }
 #gd-thumbnails-panzoom > .gd-page {
     margin-bottom: 100px;
