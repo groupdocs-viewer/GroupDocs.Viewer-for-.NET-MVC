@@ -715,6 +715,10 @@ function loadFileTree(dir) {
 		error: function(xhr, status, error) {
 		  var err = eval("(" + xhr.responseText + ")");
 		  console.log(err.Message);
+		  // hide loading spinner
+          $('#gd-modal-spinner').hide();
+		  // open error popup
+          printMessage(err.message);
 		}
     });
 }
@@ -758,6 +762,8 @@ function loadDocument(callback){
 		error: function(xhr, status, error) {
 			var err = eval("(" + xhr.responseText + ")");
 			console.log(err.Message);
+			// open error popup
+            printMessage(err.message);
 		}
 	}).done(function(data){
 		// return POST data
@@ -981,6 +987,8 @@ function appendHtmlContent(pageNumber, documentName, prefix, width, height){
 		    error: function(xhr, status, error) {
 		        var err = eval("(" + xhr.responseText + ")");
 		        console.log(err.Message);
+		        // open error popup
+                printMessage(err.error);
 		    }
 		});
     }
@@ -1275,9 +1283,9 @@ function rotatePages(angle){
 		contentType: "application/json",
 		success: function(returnedData) {
 		    if(returnedData.message != undefined){
-			// open error popup
-			printMessage(returnedData.message);
-			return;
+			    // open error popup
+			    printMessage(returnedData.message);
+			    return;
 		    }
 		    $.each(returnedData, function(index, elem){
 				// Rotate the page
@@ -1317,8 +1325,10 @@ function rotatePages(angle){
 		    });
 		},
 		error: function(xhr, status, error) {
-		  var err = eval("(" + xhr.responseText + ")");
-		  console.log(err.Message);
+		    var err = eval("(" + xhr.responseText + ")");
+		    console.log(err.Message);
+		    // open error popup
+            printMessage(err.message);
 		}
     });
 }
@@ -1480,8 +1490,10 @@ function uploadDocument(file, index, url = ''){
 		    }
 		},
 		error: function(xhr, status, error) {
-		  var err = eval("(" + xhr.responseText + ")");
-		  console.log(err.Message);
+		    var err = eval("(" + xhr.responseText + ")");
+		    console.log(err.Message);
+		    // open error popup
+            printMessage(err.message);
 		}
     });
 }
