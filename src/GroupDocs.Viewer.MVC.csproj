@@ -144,6 +144,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ViewerController.cs" />
     <Compile Include="Products\Common\Config\ApplicationConfiguration.cs" />
+    <Compile Include="Products\Common\Config\CommonConfiguration.cs" />
     <Compile Include="Products\Common\Config\GlobalConfiguration.cs" />
     <Compile Include="Products\Common\Config\ServerConfiguration.cs" />
     <Compile Include="Products\Common\Entity\Web\DocumentDescriptionEntity.cs" />

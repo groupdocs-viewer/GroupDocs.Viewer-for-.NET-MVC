@@ -25,15 +25,15 @@
             htmlMode: @config.Viewer.isHtmlMode.ToString().ToLowerInvariant(),
             preloadPageCount: @config.Viewer.PreloadPageCount,
             zoom : @config.Viewer.isZoom.ToString().ToLowerInvariant(),
-            pageSelector: @config.Viewer.isPageSelector.ToString().ToLowerInvariant(),
+            pageSelector: @config.Common.isPageSelector.ToString().ToLowerInvariant(),
             search: @config.Viewer.isSearch.ToString().ToLowerInvariant(),
             thumbnails: @config.Viewer.isThumbnails.ToString().ToLowerInvariant(),
             rotate: @config.Viewer.isRotate.ToString().ToLowerInvariant(),
-            download: @config.Viewer.isDownload.ToString().ToLowerInvariant(),
-            upload: @config.Viewer.isUpload.ToString().ToLowerInvariant(),
-            print: @config.Viewer.isPrint.ToString().ToLowerInvariant(),
-            browse: @config.Viewer.isBrowse.ToString().ToLowerInvariant(),
-            rewrite: @config.Viewer.isRewrite.ToString().ToLowerInvariant()
+            download: @config.Common.isDownload.ToString().ToLowerInvariant(),
+            upload: @config.Common.isUpload.ToString().ToLowerInvariant(),
+            print: @config.Common.isPrint.ToString().ToLowerInvariant(),
+            browse: @config.Common.isBrowse.ToString().ToLowerInvariant(),
+            rewrite: @config.Common.isRewrite.ToString().ToLowerInvariant()
             });
     </script>
 </body>

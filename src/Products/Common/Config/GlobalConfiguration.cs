@@ -10,6 +10,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         public ServerConfiguration Server;
         public ApplicationConfiguration Application;        
         public ViewerConfiguration Viewer;
+        public CommonConfiguration Common;
 
         /// <summary>
         /// Get all configurations
@@ -19,6 +20,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
             Server = new ServerConfiguration();
             Application = new ApplicationConfiguration();           
             Viewer = new ViewerConfiguration();
+            Common = new CommonConfiguration();
         }
     }
 }

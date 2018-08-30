@@ -14,16 +14,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         public string DefaultDocument { get; set; }
         public int PreloadPageCount { get; set; }
         public bool isZoom { get; set; }
-        public bool isPageSelector { get; set; }
         public bool isSearch { get; set; }
         public bool isThumbnails { get; set; }
         public bool isRotate { get; set; }
-        public bool isDownload { get; set; }
-        public bool isUpload { get; set; }
-        public bool isPrint { get; set; }
-        public bool isBrowse { get; set; }
         public bool isHtmlMode { get; set; }
-        public bool isRewrite { get; set; }
         private NameValueCollection viewerConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("viewerConfiguration");
 
         /// <summary>
@@ -37,16 +31,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
             DefaultDocument = viewerConfiguration["defaultDocument"];
             PreloadPageCount = Convert.ToInt32(viewerConfiguration["preloadPageCount"]);
             isZoom = Convert.ToBoolean(viewerConfiguration["isZoom"]);
-            isPageSelector = Convert.ToBoolean(viewerConfiguration["isPageSelector"]);
             isSearch = Convert.ToBoolean(viewerConfiguration["isSearch"]);
             isThumbnails = Convert.ToBoolean(viewerConfiguration["isThumbnails"]);
             isRotate = Convert.ToBoolean(viewerConfiguration["isRotate"]);
-            isDownload = Convert.ToBoolean(viewerConfiguration["isDownload"]);
-            isUpload = Convert.ToBoolean(viewerConfiguration["isUpload"]);
-            isPrint = Convert.ToBoolean(viewerConfiguration["isPrint"]);
-            isBrowse = Convert.ToBoolean(viewerConfiguration["isBrowse"]);
             isHtmlMode = Convert.ToBoolean(viewerConfiguration["isHtmlMode"]);
-            isRewrite = Convert.ToBoolean(viewerConfiguration["isRewrite"]);
         }
     }
 }
