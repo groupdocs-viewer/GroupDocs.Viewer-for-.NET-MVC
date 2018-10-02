@@ -570,9 +570,8 @@ section {
 }
 .gd-desktop{
     position: absolute;
-    text-align: right;
-    0: 20px
-    left:;
+    text-align: right;    
+    left: 20px;
     top: 18px;
 }
 .gd-url-wrap {
@@ -597,7 +596,7 @@ section {
     font-size: 20px;
     color: #3e4e59;
     position: absolute;
-    right: 40;
+    right: 40px;
     top: 5px;
 }
 .gd-password-wrap {
