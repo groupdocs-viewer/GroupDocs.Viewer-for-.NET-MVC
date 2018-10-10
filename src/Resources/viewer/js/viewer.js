@@ -427,7 +427,7 @@ NAV BAR CONTROLS
 		var pagesAttr = $('#gd-page-num').text().split('/');
 		// get last page number
 		var lastPageNumber = parseInt(pagesAttr[1]);
-		
+
 		if(page == lastPageNumber){
 		    appendHtmlContent(page, documentGuid, "", documentData[page - 2].width, documentData[page - 2].height);
 		    appendHtmlContent(page, documentGuid, "", documentData[page - 1].width, documentData[page - 1].height);
@@ -1636,7 +1636,7 @@ function getHtmlFileBrowser(){
 						    '<td class="gd-filetree-up gd-go-up">...</td>'+
 						    '<td></td>'+
 						    '<td></td>'+
-						'</tr>'
+						'</tr>' +
 						// list of files
 					'</tbody>'+
 				'</table>'+
