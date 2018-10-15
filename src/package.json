@@ -1,0 +1,26 @@
+{
+  "name": "groupdocs.viewer-for-.net-mvc",
+  "version": "1.0.0",
+  "description": "![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/master/src/Resources/viewer/images/banner.png \"GroupDocs.Viewer\")\r # GroupDocs.Viewer for .NET MVC Example\r ###### version 1.8.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/issues"
+  },
+  "homepage": "https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC#readme",
+  "dependencies": {
+    "@groupdocs.examples.jquery/common": "^0.4.16",
+    "@groupdocs.examples.jquery/viewer": "^0.4.15"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  }
+}
