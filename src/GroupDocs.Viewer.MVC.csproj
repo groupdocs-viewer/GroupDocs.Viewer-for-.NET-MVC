@@ -176,6 +176,7 @@
     <Content Include="Resources\common\css\swiper.min.css" />
     <Content Include="Resources\common\fonts\fontawesome-webfont.svg" />
     <Content Include="Resources\common\images\banner.png" />
+    <Content Include="Resources\common\js\es6-promise.auto.js" />
     <Content Include="Resources\common\js\jquery-ui.min.js" />
     <Content Include="Resources\common\js\jquery.min.js" />
     <Content Include="Resources\common\js\jquery.ui.touch-punch.min.js" />
