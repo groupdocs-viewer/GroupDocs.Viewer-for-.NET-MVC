@@ -1452,7 +1452,9 @@ function uploadDocument(file, index, url) {
     // add local file for uploading
     formData.append("file", file);
     // add URL if set
-    formData.append("url", url);
+    if (typeof url != "undefined" && url != null) {
+        formData.append("url", url);
+    }
     formData.append("rewrite", rewrite);
     $.ajax({
         // callback function which updates upload progress bar
@@ -1590,17 +1592,17 @@ function clearPassword() {
 * @param {Object} selector - element to wait for
 **/
 function isPageLoaded(selector) {
-    return new Promise(function(resolve, reject){
+    return new Promise(function (resolve, reject) {
         // check if loaded       
-        const waitForEl = function (selector, count) {
+        var waitForEl = function (selector, count) {
             var count = 0;
-            const el = selector.find(".gd-wrapper");
+            var el = selector.find(".gd-wrapper");
             // check if element is loaded
             if (el.length > 0) {
                 resolve(el);
             } else {
                 // wait 100 milliseconds and check again
-                setTimeout(function(){
+                setTimeout(function () {
                     if (typeof count != "undefined" && count != null) {
                         count++;
                         if (count < 120) {
@@ -1964,6 +1966,9 @@ $.fn.scrollTo = function (target, options, callback) {
     }, options);
     return this.each(function () {
         var scrollPane = $(this);
+		if(isNaN(settings.zoom)){
+			settings.zoom = 100;
+		}
         var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
         if (typeof settings.scrollTarget != "number") {
             var scrollYTop = scrollTarget.offset().top * settings.zoom / 100;
