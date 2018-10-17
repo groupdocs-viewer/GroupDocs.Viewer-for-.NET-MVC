@@ -4,7 +4,8 @@
   "description": "![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/master/src/Resources/viewer/images/banner.png \"GroupDocs.Viewer\")\r # GroupDocs.Viewer for .NET MVC Example\r ###### version 1.8.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "gulp build"
   },
   "repository": {
     "type": "git",

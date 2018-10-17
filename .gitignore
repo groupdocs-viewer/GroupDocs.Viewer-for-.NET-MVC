@@ -8,3 +8,4 @@ src/Resources/*
 !src/Resources/.gitkeep
 node_modules
 src/package-lock.json
+/src/node
