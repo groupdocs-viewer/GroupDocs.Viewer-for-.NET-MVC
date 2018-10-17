@@ -197,9 +197,6 @@
     <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="node\npm.cmd" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -211,9 +208,6 @@
     <Content Include="Resources\common\fonts\fontawesome-webfont.woff" />
     <Content Include="Resources\common\fonts\fontawesome-webfont.woff2" />
     <Content Include="Resources\common\fonts\FontAwesome.otf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="node\node.cmd" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -251,8 +245,8 @@
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
   <Target Name="BeforeBuild">
-    <Exec Command=".\node\npm.cmd install" />
-    <Exec Command=".\node\npm.cmd run build" />
+    <Exec Command="..\packages\NodeBin.5.2.0\node-5.2.0\node.exe ..\packages\NodeBin.5.2.0\npm-2.14.13\bin\npm-cli.js install" />
+    <Exec Command="..\packages\NodeBin.5.2.0\node-5.2.0\node.exe .\node_modules\gulp\bin\gulp.js build" />
   </Target>
   <Target Name="AfterBuild">
   </Target>
