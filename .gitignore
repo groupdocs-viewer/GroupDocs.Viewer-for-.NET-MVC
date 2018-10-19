@@ -4,3 +4,8 @@
 /src/bin
 /src/obj
 /App_Data/temp
+src/Resources/*
+!src/Resources/.gitkeep
+node_modules
+src/package-lock.json
+/src/node
