@@ -1,4 +1,4 @@
-![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/master/src/Resources/viewer/images/banner.png "GroupDocs.Viewer")
+![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/gh-pages/images/banner.png "GroupDocs.Viewer")
 # GroupDocs.Viewer for .NET MVC Example
 ###### version 1.10.0
 
