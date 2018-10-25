@@ -18,6 +18,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         public bool isThumbnails { get; set; }
         public bool isRotate { get; set; }
         public bool isHtmlMode { get; set; }
+        public bool isCache { get; set; }
         private NameValueCollection viewerConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("viewerConfiguration");
 
         /// <summary>
@@ -35,6 +36,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
             isThumbnails = Convert.ToBoolean(viewerConfiguration["isThumbnails"]);
             isRotate = Convert.ToBoolean(viewerConfiguration["isRotate"]);
             isHtmlMode = Convert.ToBoolean(viewerConfiguration["isHtmlMode"]);
+            isCache = Convert.ToBoolean(viewerConfiguration["isCache"]);
         }
     }
 }
