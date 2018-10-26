@@ -42,7 +42,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             // create viewer application configuration
             ViewerConfig config = new ViewerConfig();
             config.StoragePath = globalConfiguration.Viewer.FilesDirectory;
-            config.EnableCaching = true;
+            config.EnableCaching = globalConfiguration.Viewer.isCache;
             config.ForcePasswordValidation = true;
             List<string> fontsDirectory = new List<string>();
             if (!String.IsNullOrEmpty(globalConfiguration.Viewer.FontsDirectory))
