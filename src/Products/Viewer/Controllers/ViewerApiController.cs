@@ -6,6 +6,7 @@ using GroupDocs.Viewer.Converter.Options;
 using GroupDocs.Viewer.Domain;
 using GroupDocs.Viewer.Domain.Containers;
 using GroupDocs.Viewer.Domain.Options;
+using GroupDocs.Viewer.Exception;
 using GroupDocs.Viewer.Handler;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,6 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using GroupDocs.Viewer.Exception;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -26,23 +26,25 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ViewerApiController : ApiController
     {
-        
+
         private static Common.Config.GlobalConfiguration globalConfiguration;
-        private static ViewerHtmlHandler viewerHtmlHandler;
-        private static ViewerImageHandler viewerImageHandler;
+        private static ViewerHtmlHandler viewerHtmlHandler = null;
+        private static ViewerImageHandler viewerImageHandler = null;
+        public static string PASSWORD_REQUIRED = "Password Required";
+        public static string INCORRECT_PASSWORD = "Incorrect password";
 
         /// <summary>
         /// Constructor
         /// </summary>
         public ViewerApiController()
-        {            
+        {
             // Check if filesDirectory is relative or absolute path           
             globalConfiguration = new Common.Config.GlobalConfiguration();
-              
+
             // create viewer application configuration
             ViewerConfig config = new ViewerConfig();
             config.StoragePath = globalConfiguration.Viewer.FilesDirectory;
-            config.EnableCaching = globalConfiguration.Viewer.isCache;
+            config.EnableCaching = globalConfiguration.Viewer.Cache;
             config.ForcePasswordValidation = true;
             List<string> fontsDirectory = new List<string>();
             if (!String.IsNullOrEmpty(globalConfiguration.Viewer.FontsDirectory))
@@ -50,13 +52,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 fontsDirectory.Add(globalConfiguration.Viewer.FontsDirectory);
             }
             config.FontDirectories = fontsDirectory;
-            // set GroupDocs license           
             License license = new License();
             license.SetLicense(globalConfiguration.Application.LicensePath);
-            // initialize viewer instance for the HTML mode
-            viewerHtmlHandler = new ViewerHtmlHandler(config);
-            // initialize viewer instance for the Image mode
-            viewerImageHandler = new ViewerImageHandler(config);
+            if (globalConfiguration.Viewer.isHtmlMode)
+            {
+                // initialize total instance for the HTML mode
+                viewerHtmlHandler = new ViewerHtmlHandler(config);
+            }
+            else
+            {
+                // initialize total instance for the Image mode
+                viewerImageHandler = new ViewerImageHandler(config);
+            }
         }
 
         /// <summary>
@@ -83,7 +90,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 List<FileDescriptionEntity> fileList = new List<FileDescriptionEntity>();
                 if (!String.IsNullOrEmpty(globalConfiguration.Viewer.FilesDirectory))
                 {
-                    FileListContainer fileListContainer = viewerHtmlHandler.GetFileList(fileListOptions);
+                    FileListContainer fileListContainer = this.GetHandler().GetFileList(fileListOptions);
                     // parse files/folders list
                     foreach (FileDescription fd in fileListContainer.Files)
                     {
@@ -101,7 +108,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                             fileDescription.name = fd.Name;
                         }
                         // set file type
-                        fileDescription.docType = fd.DocumentType;
+                        fileDescription.docType = fd.FileFormat;
                         // set is directory true/false
                         fileDescription.isDirectory = fd.IsDirectory;
                         // set file size
@@ -129,7 +136,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             string password = "";
             string documentGuid = "";
-            bool htmlMode = false;
             try
             {
                 // get request body
@@ -137,7 +143,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 {
                     // get/set parameters
                     documentGuid = postedData.guid;
-                    htmlMode = postedData.htmlMode;
                     password = postedData.password;
                     // check if documentGuid contains path or only file name
                     if (!Path.IsPathRooted(documentGuid))
@@ -150,15 +155,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 DocumentInfoOptions documentInfoOptions = new DocumentInfoOptions(documentGuid);
                 // set password for protected document                
                 documentInfoOptions.Password = password;
-                // get document info container
-                if (htmlMode)
-                {
-                    documentInfoContainer = viewerHtmlHandler.GetDocumentInfo(documentGuid, documentInfoOptions);
-                }
-                else
-                {
-                    documentInfoContainer = viewerImageHandler.GetDocumentInfo(documentGuid, documentInfoOptions);
-                }
+                // get document info container               
+                documentInfoContainer = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions);
                 List<DocumentDescriptionEntity> pagesDescription = new List<DocumentDescriptionEntity>();
                 // get info about each document page
                 for (int i = 0; i < documentInfoContainer.Pages.Count; i++)
@@ -172,15 +170,25 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     description.number = i + 1;
                     pagesDescription.Add(description);
                 }
-                // return document description            
+                // return document description
                 return Request.CreateResponse(HttpStatusCode.OK, pagesDescription);
             }
             catch (InvalidPasswordException ex)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex, password));
+                if (String.IsNullOrEmpty(password))
+                {
+                    System.Exception error = new System.Exception(PASSWORD_REQUIRED);
+                    return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(error, password));
+                }
+                else
+                {
+                    System.Exception error = new System.Exception(INCORRECT_PASSWORD);
+                    return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(error, password));
+                }
             }
             catch (System.Exception ex)
             {
+
                 // set exception message
                 return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
             }
@@ -200,12 +208,15 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // get/set parameters
                 string documentGuid = postedData.guid;
                 int pageNumber = postedData.page;
-                bool htmlMode = postedData.htmlMode;
                 string password = postedData.password;
                 LoadedPageEntity loadedPage = new LoadedPageEntity();
+                // get document info options
+                DocumentInfoOptions documentInfoOptions = new DocumentInfoOptions(documentGuid);
+                // set password for protected document                
+                documentInfoOptions.Password = password;
                 string angle = "0";
                 // set options
-                if (htmlMode)
+                if (globalConfiguration.Viewer.isHtmlMode)
                 {
                     HtmlOptions htmlOptions = new HtmlOptions();
                     htmlOptions.PageNumber = pageNumber;
@@ -217,9 +228,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                         htmlOptions.Password = password;
                     }
                     // get page HTML
-                    loadedPage.pageHtml = viewerHtmlHandler.GetPages(documentGuid, htmlOptions)[0].HtmlContent;
+                    loadedPage.pageHtml = this.GetHandler().GetPages(documentGuid, htmlOptions)[0].HtmlContent;
                     // get page rotation angle
-                    angle = viewerHtmlHandler.GetDocumentInfo(documentGuid).Pages[pageNumber - 1].Angle.ToString();
+                    angle = viewerHtmlHandler.GetDocumentInfo(documentGuid, documentInfoOptions).Pages[pageNumber - 1].Angle.ToString();
                 }
                 else
                 {
@@ -235,15 +246,15 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     byte[] bytes;
                     using (var memoryStream = new MemoryStream())
                     {
-                        viewerImageHandler.GetPages(documentGuid, imageOptions)[0].Stream.CopyTo(memoryStream);
+                        this.GetHandler().GetPages(documentGuid, imageOptions)[0].Stream.CopyTo(memoryStream);
                         bytes = memoryStream.ToArray();
                     }
 
-                    string incodedImage = Convert.ToBase64String(bytes);
+                    string encodedImage = Convert.ToBase64String(bytes);
 
-                    loadedPage.pageImage = incodedImage;
+                    loadedPage.pageImage = encodedImage;
                     // get page rotation angle
-                    angle = viewerImageHandler.GetDocumentInfo(documentGuid).Pages[pageNumber - 1].Angle.ToString();
+                    angle = viewerImageHandler.GetDocumentInfo(documentGuid, documentInfoOptions).Pages[pageNumber - 1].Angle.ToString();
                 }
                 loadedPage.angle = angle;
                 // return loaded page object
@@ -271,8 +282,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 string documentGuid = postedData.guid;
                 int angle = postedData.angle;
                 List<int> pages = postedData.pages;
-                bool htmlMode = postedData.htmlMode;
                 string password = postedData.password;
+                DocumentInfoOptions documentInfoOptions = new DocumentInfoOptions(documentGuid);
+                // set password for protected document                
+                documentInfoOptions.Password = password;
                 // a list of the rotated pages info
                 List<RotatedPageEntity> rotatedPages = new List<RotatedPageEntity>();
                 // rotate pages
@@ -289,21 +302,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     {
                         rotateOptions.Password = password;
                     }
-                    if (htmlMode)
-                    {
-                        viewerHtmlHandler.RotatePage(documentGuid, rotateOptions);
-                        resultAngle = viewerHtmlHandler.GetDocumentInfo(documentGuid).Pages[pageNumber - 1].Angle.ToString();
-                    }
-                    else
-                    {
-                        viewerImageHandler.RotatePage(documentGuid, rotateOptions);
-                        resultAngle = viewerImageHandler.GetDocumentInfo(documentGuid).Pages[pageNumber - 1].Angle.ToString();
-                    }
+                    this.GetHandler().RotatePage(documentGuid, rotateOptions);
+                    resultAngle = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions).Pages[pageNumber - 1].Angle.ToString();
                     // add rotated page number
                     rotatedPage.pageNumber = pageNumber;
                     // add rotated page angle
                     rotatedPage.angle = resultAngle;
-                    // add rotated page object into resulting list
+                    // add rotated page object into resulting list                   
                     rotatedPages.Add(rotatedPage);
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, rotatedPages);
@@ -378,7 +383,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                             httpPostedFile.SaveAs(fileSavePath);
                         }
                     }
-                } 
+                }
                 else
                 {
                     using (WebClient client = new WebClient())
@@ -408,6 +413,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // set exception message
                 return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
             }
-        }       
+        }
+
+        private dynamic GetHandler()
+        {
+            if (viewerHtmlHandler != null)
+            {
+                return viewerHtmlHandler;
+            }
+            else
+            {
+                return viewerImageHandler;
+            }
+        }
     }
 }
