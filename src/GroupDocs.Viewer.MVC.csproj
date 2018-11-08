@@ -246,6 +246,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <Exec Command="..\packages\NodeBin.5.2.0\node-5.2.0\node.exe ..\packages\NodeBin.5.2.0\npm-2.14.13\bin\npm-cli.js install" />
+    <Exec Command="..\packages\NodeBin.5.2.0\node-5.2.0\node.exe ..\packages\NodeBin.5.2.0\npm-2.14.13\bin\npm-cli.js update" />
     <Exec Command="..\packages\NodeBin.5.2.0\node-5.2.0\node.exe .\node_modules\gulp\bin\gulp.js build" />
   </Target>
   <Target Name="AfterBuild">
