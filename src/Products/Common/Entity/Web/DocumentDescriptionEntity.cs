@@ -1,12 +1,13 @@
-﻿namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
+﻿
+namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
     /// <summary>
     /// DocumentDescriptionEntity
     /// </summary>
     public class DocumentDescriptionEntity
     {
-        public double width { get; set; }
-        public double height { get; set; }
-        public int number { get; set; }
+        public double width{ get; set; }
+        public double height{ get; set; }
+        public int number{ get; set; }
     }
 }

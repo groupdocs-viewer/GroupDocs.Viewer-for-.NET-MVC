@@ -1,42 +1,63 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Configuration;
+﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
+using GroupDocs.Viewer.MVC.Products.Common.Util.Parser;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 {
     /// <summary>
     /// ViewerConfiguration
     /// </summary>
-    public class ViewerConfiguration : ConfigurationSection
+    public class ViewerConfiguration
     {
-        public string FilesDirectory { get; set; }
-        public string FontsDirectory { get; set; }
-        public string DefaultDocument { get; set; }
-        public int PreloadPageCount { get; set; }
-        public bool isZoom { get; set; }
-        public bool isSearch { get; set; }
-        public bool isThumbnails { get; set; }
-        public bool isRotate { get; set; }
-        public bool isHtmlMode { get; set; }
-        public bool Cache { get; set; }
-        private NameValueCollection viewerConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("viewerConfiguration");
+        public string FilesDirectory = "DocumentSamples/Viewer";
+        public string FontsDirectory = "";
+        public string DefaultDocument = "";
+        public int PreloadPageCount = 0;
+        public bool isZoom = true;
+        public bool isSearch = true;
+        public bool isThumbnails = true;
+        public bool isRotate = true;
+        public bool isHtmlMode = true;
+        public bool Cache = true;       
 
         /// <summary>
         /// Constructor
         /// </summary>
         public ViewerConfiguration()
         {
+            YamlParser parser = new YamlParser();
+            dynamic configuration = parser.GetConfiguration("viewer");
+            ConfigurationValuesGetter valuesGetter = new ConfigurationValuesGetter(configuration);
+
             // get Viewer configuration section from the web.config
-            FilesDirectory = viewerConfiguration["filesDirectory"];
-            FontsDirectory = viewerConfiguration["fontsDirectory"];
-            DefaultDocument = viewerConfiguration["defaultDocument"];
-            PreloadPageCount = Convert.ToInt32(viewerConfiguration["preloadPageCount"]);
-            isZoom = Convert.ToBoolean(viewerConfiguration["isZoom"]);
-            isSearch = Convert.ToBoolean(viewerConfiguration["isSearch"]);
-            isThumbnails = Convert.ToBoolean(viewerConfiguration["isThumbnails"]);
-            isRotate = Convert.ToBoolean(viewerConfiguration["isRotate"]);
-            isHtmlMode = Convert.ToBoolean(viewerConfiguration["isHtmlMode"]);
-            Cache = Convert.ToBoolean(viewerConfiguration["cache"]);
+            FilesDirectory = valuesGetter.GetStringPropertyValue("filesDirectory", FilesDirectory);
+            if (!IsFullPath(FilesDirectory))
+            {
+                FilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FilesDirectory);
+                if (!Directory.Exists(FilesDirectory))
+                {                   
+                    Directory.CreateDirectory(FilesDirectory);
+                }
+            }
+            FontsDirectory = valuesGetter.GetStringPropertyValue("fontsDirectory", FontsDirectory);
+            DefaultDocument = valuesGetter.GetStringPropertyValue("defaultDocument", DefaultDocument);
+            PreloadPageCount = valuesGetter.GetIntegerPropertyValue("preloadPageCount", PreloadPageCount);
+            isZoom = valuesGetter.GetBooleanPropertyValue("zoom", isZoom);
+            isSearch = valuesGetter.GetBooleanPropertyValue("search", isSearch);
+            isThumbnails = valuesGetter.GetBooleanPropertyValue("thumbnails", isThumbnails);
+            isRotate = valuesGetter.GetBooleanPropertyValue("rotate", isRotate);
+            isHtmlMode = valuesGetter.GetBooleanPropertyValue("htmlMode", isHtmlMode);
+            Cache = valuesGetter.GetBooleanPropertyValue("cache", Cache);
         }
+
+        private static bool IsFullPath(string path)
+        {
+            return !String.IsNullOrWhiteSpace(path)
+                && path.IndexOfAny(System.IO.Path.GetInvalidPathChars().ToArray()) == -1
+                && Path.IsPathRooted(path)
+                && !Path.GetPathRoot(path).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal);
+        }        
     }
 }

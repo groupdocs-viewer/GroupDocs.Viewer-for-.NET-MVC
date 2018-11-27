@@ -1,6 +1,6 @@
 ![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/groupdocs-viewer.github.io/master/resources/image/banner.png "GroupDocs.Viewer")
 # GroupDocs.Viewer for .NET MVC Example
-###### version 1.13.0
+###### version 1.14.0
 
 [![Build status](https://ci.appveyor.com/api/projects/status/6an4msspo1lh4two/branch/master?svg=true)](https://ci.appveyor.com/project/egorovpavel/groupdocs-viewer-for-net-mvc/branch/master)
 
@@ -58,6 +58,12 @@ https://www.youtube.com/watch?v=NnZaMNUC6o0
 7. Go to `http://localhost:{PORT}/viewer/`.
 PORT - port number specified in `Web.config` (by default http://localhost:8080/viewer/).
 
+## How to run in standalone mode
+1. Navigate to GroupDocs.Viewer for .NET MVC Sample root directory.
+2. Update parameters in `web.config` to meet your requirements.
+3. Execute the 'LaunchServer.bat' file.
+4. Go to `http://localhost:{PORT}/`.
+PORT - port number specified in `web.config` and in 'LaunchServer.bat'(by default http://localhost:8080).
 
 ## Resources
 - **Website:** [www.groupdocs.com](http://www.groupdocs.com)

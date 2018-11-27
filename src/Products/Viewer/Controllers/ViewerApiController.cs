@@ -56,12 +56,12 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             license.SetLicense(globalConfiguration.Application.LicensePath);
             if (globalConfiguration.Viewer.isHtmlMode)
             {
-                // initialize total instance for the HTML mode
+                // initialize Viewer instance for the HTML mode
                 viewerHtmlHandler = new ViewerHtmlHandler(config);
             }
             else
             {
-                // initialize total instance for the Image mode
+                // initialize Viewer instance for the Image mode
                 viewerImageHandler = new ViewerImageHandler(config);
             }
         }

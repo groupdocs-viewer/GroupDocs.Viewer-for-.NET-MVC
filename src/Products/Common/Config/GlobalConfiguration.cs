@@ -8,15 +8,15 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
     public class GlobalConfiguration
     {
         public ServerConfiguration Server;
-        public ApplicationConfiguration Application;        
+        public ApplicationConfiguration Application;
+        public CommonConfiguration Common;        
         public ViewerConfiguration Viewer;
-        public CommonConfiguration Common;
 
         /// <summary>
         /// Get all configurations
         /// </summary>
         public GlobalConfiguration()
-        {
+        {            
             Server = new ServerConfiguration();
             Application = new ApplicationConfiguration();           
             Viewer = new ViewerConfiguration();
