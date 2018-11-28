@@ -1,6 +1,7 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 using System;
 using System.IO;
+using System.Web;
 
 namespace GroupDocs.Viewer.MVC.Products.Common.Resources
 {
@@ -48,11 +49,11 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Resources
         /// <summary>
         /// Generate exception
         /// </summary>
-        /// <param name="ex">System.Exception</param>
-        /// <returns>System.ExceptionEntity</returns>
+        /// <param name="ex">Exception</param>
+        /// <returns>ExceptionEntity</returns>
         public ExceptionEntity GenerateException(System.Exception ex)
         {
-            // Initiate System.Exception entity
+            // Initiate Exception entity
             ExceptionEntity exceptionEntity = new ExceptionEntity();
             // set exception data
             exceptionEntity.message = ex.Message;
@@ -63,9 +64,9 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Resources
         /// <summary>
         /// Generate exception for password error
         /// </summary>
-        /// <param name="ex">System.Exception</param>
+        /// <param name="ex">Exception</param>
         /// <param name="password">string</param>
-        /// <returns>System.ExceptionEntity</returns>
+        /// <returns>ExceptionEntity</returns>
         public ExceptionEntity GenerateException(System.Exception ex, String password)
         {
             // Initiate exception

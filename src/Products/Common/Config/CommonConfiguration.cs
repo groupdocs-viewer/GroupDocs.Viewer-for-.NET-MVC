@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GroupDocs.Viewer.MVC.Products.Common.Util.Parser;
+using System;
 using System.Collections.Specialized;
 using System.Configuration;
 
@@ -9,12 +10,12 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
     /// </summary>
     public class CommonConfiguration : ConfigurationSection
     {
-        public bool isPageSelector { get; set; }
-        public bool isDownload { get; set; }
-        public bool isUpload { get; set; }
-        public bool isPrint { get; set; }
-        public bool isBrowse { get; set; }
-        public bool isRewrite { get; set; }
+        public bool isPageSelector {get; set;}
+        public bool isDownload {get; set;}
+        public bool isUpload {get; set;}
+        public bool isPrint {get; set;}
+        public bool isBrowse {get; set;}
+        public bool isRewrite {get; set;}
         private NameValueCollection commonConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("commonConfiguration");
 
         /// <summary>
@@ -22,13 +23,15 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         /// </summary>
         public CommonConfiguration()
         {
-            // get Common configuration section from the web.config           
-            isPageSelector = Convert.ToBoolean(commonConfiguration["isPageSelector"]);
-            isDownload = Convert.ToBoolean(commonConfiguration["isDownload"]);
-            isUpload = Convert.ToBoolean(commonConfiguration["isUpload"]);
-            isPrint = Convert.ToBoolean(commonConfiguration["isPrint"]);
-            isBrowse = Convert.ToBoolean(commonConfiguration["isBrowse"]);
-            isRewrite = Convert.ToBoolean(commonConfiguration["isRewrite"]);
+            YamlParser parser = new YamlParser();
+            dynamic configuration = parser.GetConfiguration("common");
+            ConfigurationValuesGetter valuesGetter = new ConfigurationValuesGetter(configuration);
+            isPageSelector = valuesGetter.GetBooleanPropertyValue("pageSelector", Convert.ToBoolean(commonConfiguration["isPageSelector"]));
+            isDownload = valuesGetter.GetBooleanPropertyValue("download", Convert.ToBoolean(commonConfiguration["isDownload"]));
+            isUpload = valuesGetter.GetBooleanPropertyValue("upload", Convert.ToBoolean(commonConfiguration["isUpload"]));
+            isPrint = valuesGetter.GetBooleanPropertyValue("print", Convert.ToBoolean(commonConfiguration["isPrint"]));
+            isBrowse = valuesGetter.GetBooleanPropertyValue("browse", Convert.ToBoolean(commonConfiguration["isBrowse"]));
+            isRewrite = valuesGetter.GetBooleanPropertyValue("rewrite", Convert.ToBoolean(commonConfiguration["isRewrite"]));
         }
     }
 }

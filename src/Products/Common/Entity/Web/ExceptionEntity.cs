@@ -1,8 +1,9 @@
-﻿
+﻿using System;
+
 namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
     /// <summary>
-    /// System.Exception entity
+    /// Exception entity
     /// </summary>
     public class ExceptionEntity
     {
