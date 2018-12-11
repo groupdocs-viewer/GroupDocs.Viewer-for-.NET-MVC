@@ -14,7 +14,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
             Configuration = configuration;
         }
 
-        public string GetStringPropertyValue(string propertyName, string defaultValue)
+        public string GetStringPropertyValue(string propertyName, string defaultValue = null)
         {
             return (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName].ToString())) ? 
                 Configuration[propertyName].ToString() :

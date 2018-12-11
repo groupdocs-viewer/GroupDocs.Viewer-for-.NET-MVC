@@ -22,18 +22,28 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
             YamlParser parser = new YamlParser();
             dynamic configuration = parser.GetConfiguration("application");
             ConfigurationValuesGetter valuesGetter = new ConfigurationValuesGetter(configuration);
-            LicensePath = valuesGetter.GetStringPropertyValue("licensePath", LicensePath);            
-            if (!IsFullPath(LicensePath))
+            string license = valuesGetter.GetStringPropertyValue("licensePath");
+            if (String.IsNullOrEmpty(license))
             {
-                LicensePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LicensePath);
-                if (!Directory.Exists(Path.GetDirectoryName(LicensePath)))
-                {                    
-                    Directory.CreateDirectory(Path.GetDirectoryName(LicensePath));
-                }
+                string[] files = System.IO.Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LicensePath), "*.lic");
+                LicensePath = Path.Combine(LicensePath, files[0]);
             }
-            if (!File.Exists(LicensePath))
+            else
             {
-                LicensePath = "";
+                if (!IsFullPath(license))
+                {
+                    license = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, license);
+                    if (!Directory.Exists(Path.GetDirectoryName(license)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(license));
+                    }
+                }
+                LicensePath = license;
+                if (!File.Exists(LicensePath))
+                {
+                    Debug.WriteLine("License file path is incorrect, launched in trial mode");
+                    LicensePath = "";
+                }
             }
         }
 
