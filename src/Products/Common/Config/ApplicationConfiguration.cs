@@ -1,5 +1,8 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Util.Parser;
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -39,7 +42,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
                 }
                 LicensePath = license;
                 if (!File.Exists(LicensePath))
-                {
+                {                    
                     Debug.WriteLine("License file path is incorrect, launched in trial mode");
                     LicensePath = "";
                 }

@@ -1,8 +1,10 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Parser;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 {

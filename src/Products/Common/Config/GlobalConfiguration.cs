@@ -9,7 +9,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
     {
         public ServerConfiguration Server;
         public ApplicationConfiguration Application;
-        public CommonConfiguration Common;        
+        public CommonConfiguration Common;
         public ViewerConfiguration Viewer;
 
         /// <summary>
@@ -18,7 +18,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         public GlobalConfiguration()
         {            
             Server = new ServerConfiguration();
-            Application = new ApplicationConfiguration();           
+            Application = new ApplicationConfiguration();
             Viewer = new ViewerConfiguration();
             Common = new CommonConfiguration();
         }

@@ -6,7 +6,7 @@ using Huygens;
 using System;
 using GroupDocs.Viewer.MVC;
 
-namespace GroupDocs.Total.MVC.Test
+namespace GroupDocs.Viewer.MVC.Test
 {
     [TestFixture]
     public class ViewerControllerTest

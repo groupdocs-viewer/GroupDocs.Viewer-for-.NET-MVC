@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
 namespace GroupDocs.Viewer.MVC.Products.Common.Config
 {
@@ -11,21 +14,40 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
             Configuration = configuration;
         }
 
-        public string GetStringPropertyValue(string propertyName, string defaultValue = null)
+        public string GetStringPropertyValue(string propertyName)
         {
-            return (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName].ToString())) ? 
+            return (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName].ToString())) ?
+                Configuration[propertyName].ToString() :
+                null;
+        }
+
+        public string GetStringPropertyValue(string propertyName, string defaultValue)
+        {
+            return (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName].ToString())) ?
                 Configuration[propertyName].ToString() :
                 defaultValue;
         }
 
-        public int GetIntegerPropertyValue(string propertyName, int defaultValue, string innerPropertyName = "")
+        public int GetIntegerPropertyValue(string propertyName, int defaultValue)
         {
             int value;
-            if (!String.IsNullOrEmpty(innerPropertyName)) {
-                value = (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName][innerPropertyName].ToString())) ? 
-                    Convert.ToInt32(Configuration[propertyName][innerPropertyName]) : 
+            value = (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName].ToString())) ?
+                Convert.ToInt32(Configuration[propertyName]) :
+                defaultValue;
+            return value;
+        }
+
+        public int GetIntegerPropertyValue(string propertyName, int defaultValue, string innerPropertyName)
+        {
+            int value;
+            if (!String.IsNullOrEmpty(innerPropertyName))
+            {
+                value = (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName][innerPropertyName].ToString())) ?
+                    Convert.ToInt32(Configuration[propertyName][innerPropertyName]) :
                     defaultValue;
-            } else {
+            }
+            else
+            {
                 value = (Configuration != null && Configuration[propertyName] != null && !String.IsNullOrEmpty(Configuration[propertyName].ToString())) ?
                     Convert.ToInt32(Configuration[propertyName]) :
                     defaultValue;

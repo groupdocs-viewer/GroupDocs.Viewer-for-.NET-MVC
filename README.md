@@ -1,6 +1,6 @@
 ![Alt text](https://raw.githubusercontent.com/groupdocs-viewer/groupdocs-viewer.github.io/master/resources/image/banner.png "GroupDocs.Viewer")
 # GroupDocs.Viewer for .NET MVC Example
-###### version 1.15.0
+###### version 1.16.0
 
 [![Build status](https://ci.appveyor.com/api/projects/status/6an4msspo1lh4two/branch/master?svg=true)](https://ci.appveyor.com/project/egorovpavel/groupdocs-viewer-for-net-mvc/branch/master)
 
