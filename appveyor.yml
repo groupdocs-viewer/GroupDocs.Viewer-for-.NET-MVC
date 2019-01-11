@@ -1,0 +1,30 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: minimal
+after_test:
+- cmd: >-
+    mkdir "artifacts\coverage"
+
+    nuget install OpenCover -Version 4.6.519
+
+    cd OpenCover.4.6.519\tools
+
+    OpenCover.Console.exe -target:nunit3-console.exe -targetargs:"--noheader --framework=net-4.5 --result=..\..\artifacts\coverage\nunit-results.xml ..\..\GroupDocs.Viewer.MVC.Test\bin\Debug\GroupDocs.Total.MVC.Test.dll" -output:"..\..\artifacts\coverage\results.xml" -register:user -filter:"+[GroupDocs.Viewer.MVC*]* -[GroupDocs.Viewer.MVC.Test*]*"
+
+    cd ..\..
+
+    nuget install OpenCoverToCoberturaConverter -Version 0.3.4
+
+    cd OpenCoverToCoberturaConverter.0.3.4\tools
+
+    OpenCoverToCoberturaConverter.exe -input:"..\..\artifacts\coverage\results.xml" -output:"..\..\artifacts\coverage\results-cobertura.xml" -sources:..\..\
+
+    cd ..\..
+
+    curl -L https://github.com/codacy/codacy-coverage-reporter/releases/download/4.0.5/codacy-coverage-reporter-4.0.5-assembly.jar > ./cc-reporter.jar
+
+    java -jar cc-reporter.jar report -l CSharp --force-language -r artifacts\coverage\results-cobertura.xml
