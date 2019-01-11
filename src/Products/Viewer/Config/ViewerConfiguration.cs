@@ -1,8 +1,10 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Parser;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 {
@@ -11,16 +13,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
     /// </summary>
     public class ViewerConfiguration
     {
-        public string FilesDirectory = "DocumentSamples/Viewer";
-        public string FontsDirectory = "";
-        public string DefaultDocument = "";
-        public int PreloadPageCount = 0;
-        public bool isZoom = true;
-        public bool isSearch = true;
-        public bool isThumbnails = true;
-        public bool isRotate = true;
-        public bool isHtmlMode = true;
-        public bool Cache = true;       
+        private string FilesDirectory = "DocumentSamples/Viewer";
+        private string FontsDirectory = "";
+        private string DefaultDocument = "";
+        private int PreloadPageCount = 0;
+        private bool isZoom = true;
+        private bool isSearch = true;
+        private bool isThumbnails = true;
+        private bool isRotate = true;
+        private bool isHtmlMode = true;
+        private bool Cache = true;       
 
         /// <summary>
         /// Constructor
@@ -59,5 +61,105 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
                 && Path.IsPathRooted(path)
                 && !Path.GetPathRoot(path).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal);
         }        
+
+        public void SetFilesDirectory(string filesDirectory)
+        {
+            this.FilesDirectory = filesDirectory;
+        }
+
+        public string GetFilesDirectory()
+        {
+            return FilesDirectory;
+        }
+
+        public void SetFontsDirectory(string fontsDirectory)
+        {
+            this.FontsDirectory = fontsDirectory;
+        }
+
+        public string GetFontsDirectory()
+        {
+            return FontsDirectory;
+        }
+
+        public void SetDefaultDocument(string defaultDocument)
+        {
+            this.DefaultDocument = defaultDocument;
+        }
+
+        public string GetDefaultDocument()
+        {
+            return DefaultDocument;
+        }
+
+        public void SetPreloadPageCount(int preloadPageCount)
+        {
+            this.PreloadPageCount = preloadPageCount;
+        }
+
+        public int GetPreloadPageCount()
+        {
+            return PreloadPageCount;
+        }
+
+        public void SetIsZoom(bool isZoom)
+        {
+            this.isZoom = isZoom;
+        }
+
+        public bool GetIsZoom()
+        {
+            return isZoom;
+        }
+
+        public void SetIsSearch(bool isSearch)
+        {
+            this.isSearch = isSearch;
+        }
+
+        public bool GetIsSearch()
+        {
+            return isSearch;
+        }
+
+        public void SetIsThumbnails(bool isThumbnails)
+        {
+            this.isThumbnails = isThumbnails;
+        }
+
+        public bool GetIsThumbnails()
+        {
+            return isThumbnails;
+        }
+
+        public void SetIsRotate(bool isRotate)
+        {
+            this.isRotate = isRotate;
+        }
+
+        public bool GetIsRotate()
+        {
+            return isRotate;
+        }
+
+        public void SetIsHtmlMode(bool isHtmlMode)
+        {
+            this.isHtmlMode = isHtmlMode;
+        }
+
+        public bool GetIsHtmlMode()
+        {
+            return isHtmlMode;
+        }
+
+        public void SetCache(bool Cache)
+        {
+            this.Cache = Cache;
+        }
+
+        public bool GetCache()
+        {
+            return Cache;
+        }
     }
 }

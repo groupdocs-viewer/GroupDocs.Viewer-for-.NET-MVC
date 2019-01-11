@@ -12,7 +12,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
     {
         public int HttpPort = 8080;
         public string HostAddress = "localhost";
-        private NameValueCollection serverConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("serverConfiguration");
+        private readonly NameValueCollection serverConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("serverConfiguration");
 
         /// <summary>
         /// Get server configuration section of the web.config

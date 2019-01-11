@@ -17,6 +17,7 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -30,8 +31,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         private static Common.Config.GlobalConfiguration globalConfiguration;
         private static ViewerHtmlHandler viewerHtmlHandler = null;
         private static ViewerImageHandler viewerImageHandler = null;
-        public static string PASSWORD_REQUIRED = "Password Required";
-        public static string INCORRECT_PASSWORD = "Incorrect password";
+        public static readonly string PASSWORD_REQUIRED = "Password Required";
+        public static readonly string INCORRECT_PASSWORD = "Incorrect password";
 
         /// <summary>
         /// Constructor
@@ -43,18 +44,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             // create viewer application configuration
             ViewerConfig config = new ViewerConfig();
-            config.StoragePath = globalConfiguration.Viewer.FilesDirectory;
-            config.EnableCaching = globalConfiguration.Viewer.Cache;
+            config.StoragePath = globalConfiguration.Viewer.GetFilesDirectory();
+            config.EnableCaching = globalConfiguration.Viewer.GetCache();
             config.ForcePasswordValidation = true;
             List<string> fontsDirectory = new List<string>();
-            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.FontsDirectory))
+            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
             {
-                fontsDirectory.Add(globalConfiguration.Viewer.FontsDirectory);
+                fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
             }
             config.FontDirectories = fontsDirectory;
-            License license = new License();
-            license.SetLicense(globalConfiguration.Application.LicensePath);
-            if (globalConfiguration.Viewer.isHtmlMode)
+            if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
                 // initialize Viewer instance for the HTML mode
                 viewerHtmlHandler = new ViewerHtmlHandler(config);
@@ -88,7 +87,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             try
             {
                 List<FileDescriptionEntity> fileList = new List<FileDescriptionEntity>();
-                if (!String.IsNullOrEmpty(globalConfiguration.Viewer.FilesDirectory))
+                if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetFilesDirectory()))
                 {
                     FileListContainer fileListContainer = this.GetHandler().GetFileList(fileListOptions);
                     // parse files/folders list
@@ -135,21 +134,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         public HttpResponseMessage LoadDocumentDescription(PostedDataEntity postedData)
         {
             string password = "";
-            string documentGuid = "";
             try
             {
-                // get request body
-                if (postedData != null)
+
+                // get/set parameters
+                string documentGuid = postedData.guid;
+                password = postedData.password;
+                // check if documentGuid contains path or only file name
+                if (!Path.IsPathRooted(documentGuid))
                 {
-                    // get/set parameters
-                    documentGuid = postedData.guid;
-                    password = postedData.password;
-                    // check if documentGuid contains path or only file name
-                    if (!Path.IsPathRooted(documentGuid))
-                    {
-                        documentGuid = globalConfiguration.Viewer.FilesDirectory + "/" + documentGuid;
-                    }
+                    documentGuid = globalConfiguration.Viewer.GetFilesDirectory() + "/" + documentGuid;
                 }
+
                 DocumentInfoContainer documentInfoContainer = new DocumentInfoContainer();
                 // get document info options
                 DocumentInfoOptions documentInfoOptions = new DocumentInfoOptions(documentGuid);
@@ -157,32 +153,26 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 documentInfoOptions.Password = password;
                 // get document info container               
                 documentInfoContainer = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions);
-                List<DocumentDescriptionEntity> pagesDescription = new List<DocumentDescriptionEntity>();
-                // get info about each document page
-                for (int i = 0; i < documentInfoContainer.Pages.Count; i++)
+                List<PageDescriptionEntity> pages = GetPageDescriptionEntities(documentInfoContainer.Pages);
+                LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
+                loadDocumentEntity.SetGuid(documentGuid);
+                foreach (PageDescriptionEntity page in pages)
                 {
-                    //initiate custom Document description object
-                    DocumentDescriptionEntity description = new DocumentDescriptionEntity();
-
-                    // set current page info for result
-                    description.height = documentInfoContainer.Pages[i].Height;
-                    description.width = documentInfoContainer.Pages[i].Width;
-                    description.number = i + 1;
-                    pagesDescription.Add(description);
+                    loadDocumentEntity.SetPages(page);
                 }
                 // return document description
-                return Request.CreateResponse(HttpStatusCode.OK, pagesDescription);
+                return Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);
             }
             catch (InvalidPasswordException ex)
             {
                 if (String.IsNullOrEmpty(password))
                 {
-                    System.Exception error = new System.Exception(PASSWORD_REQUIRED);
+                    InvalidOperationException error = new InvalidOperationException(PASSWORD_REQUIRED);
                     return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(error, password));
                 }
                 else
                 {
-                    System.Exception error = new System.Exception(INCORRECT_PASSWORD);
+                    InvalidOperationException error = new InvalidOperationException(INCORRECT_PASSWORD);
                     return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(error, password));
                 }
             }
@@ -216,7 +206,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 documentInfoOptions.Password = password;
                 string angle = "0";
                 // set options
-                if (globalConfiguration.Viewer.isHtmlMode)
+                if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
                     HtmlOptions htmlOptions = new HtmlOptions();
                     htmlOptions.PageNumber = pageNumber;
@@ -305,9 +295,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     this.GetHandler().RotatePage(documentGuid, rotateOptions);
                     resultAngle = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions).Pages[pageNumber - 1].Angle.ToString();
                     // add rotated page number
-                    rotatedPage.pageNumber = pageNumber;
+                    rotatedPage.SetPageNumber(pageNumber);
                     // add rotated page angle
-                    rotatedPage.angle = resultAngle;
+                    rotatedPage.SetAngle(resultAngle);
                     // add rotated page object into resulting list                   
                     rotatedPages.Add(rotatedPage);
                 }
@@ -358,7 +348,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 string url = HttpContext.Current.Request.Form["url"];
                 // get documents storage path
-                string documentStoragePath = globalConfiguration.Viewer.FilesDirectory;
+                string documentStoragePath = globalConfiguration.Viewer.GetFilesDirectory();
                 bool rewrite = bool.Parse(HttpContext.Current.Request.Form["rewrite"]);
                 string fileSavePath = "";
                 if (string.IsNullOrEmpty(url))
@@ -376,7 +366,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                             }
                             else
                             {
-                                fileSavePath = new Resources().GetFreeFileName(documentStoragePath, httpPostedFile.FileName);
+                                fileSavePath = Resources.GetFreeFileName(documentStoragePath, httpPostedFile.FileName);
                             }
 
                             // Save the uploaded file to "UploadedFiles" folder
@@ -398,7 +388,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                         }
                         else
                         {
-                            fileSavePath = new Resources().GetFreeFileName(documentStoragePath, fileName);
+                            fileSavePath = Resources.GetFreeFileName(documentStoragePath, fileName);
                         }
                         // Download the Web resource and save it into the current filesystem folder.
                         client.DownloadFile(url, fileSavePath);
@@ -425,6 +415,21 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 return viewerImageHandler;
             }
+        }
+
+        private static List<PageDescriptionEntity> GetPageDescriptionEntities(List<PageData> containerPages)
+        {
+            List<PageDescriptionEntity> pages = new List<PageDescriptionEntity>();
+            foreach (PageData page in containerPages)
+            {
+                PageDescriptionEntity pageDescriptionEntity = new PageDescriptionEntity();
+                pageDescriptionEntity.number = page.Number;
+                pageDescriptionEntity.angle = page.Angle;
+                pageDescriptionEntity.height = page.Height;
+                pageDescriptionEntity.width = page.Width;
+                pages.Add(pageDescriptionEntity);
+            }
+            return pages;
         }
     }
 }

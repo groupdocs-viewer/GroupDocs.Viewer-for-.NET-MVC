@@ -10,12 +10,12 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
     /// </summary>
     public class CommonConfiguration : ConfigurationSection
     {
-        public bool isPageSelector {get; set;}
-        public bool isDownload {get; set;}
-        public bool isUpload {get; set;}
-        public bool isPrint {get; set;}
-        public bool isBrowse {get; set;}
-        public bool isRewrite {get; set;}
+        public bool isPageSelector { get; set; }    
+        public bool isDownload { get; set; }
+        public bool isUpload { get; set; }
+        public bool isPrint { get; set; }
+        public bool isBrowse { get; set; }
+        public bool isRewrite { get; set; }
         private NameValueCollection commonConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("commonConfiguration");
 
         /// <summary>
