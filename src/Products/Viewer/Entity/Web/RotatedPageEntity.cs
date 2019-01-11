@@ -1,4 +1,6 @@
 ﻿
+using Newtonsoft.Json;
+
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
     /// <summary>
@@ -6,7 +8,29 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
     /// </summary>
     public class RotatedPageEntity
     {
-        public int pageNumber;
-        public string angle;        
+        [JsonProperty]
+        private int pageNumber;
+
+        [JsonProperty]
+        private string angle;
+
+        public void SetPageNumber(int number) {
+            this.pageNumber = number;
+        }
+
+        public int GetPageNumber()
+        {
+            return pageNumber;
+        }
+
+        public void SetAngle(string angle)
+        {
+            this.angle = angle;
+        }
+
+        public string GetAngle()
+        {
+            return angle;
+        }
     }
 }
