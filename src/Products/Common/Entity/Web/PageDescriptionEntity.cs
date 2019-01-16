@@ -1,4 +1,6 @@
 ﻿
+using Newtonsoft.Json;
+
 namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
     /// <summary>
@@ -10,5 +12,18 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         public double height{ get; set; }
         public int number{ get; set; }
         public int angle { get; set; }
+
+        [JsonProperty]
+        private string data;
+
+        public void SetData(string data)
+        {
+            this.data = data;
+        }
+
+        public string GetData()
+        {
+            return data;
+        }
     }
 }
