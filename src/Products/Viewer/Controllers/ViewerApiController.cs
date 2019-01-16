@@ -17,7 +17,6 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -31,8 +30,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         private static Common.Config.GlobalConfiguration globalConfiguration;
         private static ViewerHtmlHandler viewerHtmlHandler = null;
         private static ViewerImageHandler viewerImageHandler = null;
-        public static readonly string PASSWORD_REQUIRED = "Password Required";
-        public static readonly string INCORRECT_PASSWORD = "Incorrect password";
 
         /// <summary>
         /// Constructor
@@ -48,6 +45,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             config.EnableCaching = globalConfiguration.Viewer.GetCache();
             config.ForcePasswordValidation = true;
             List<string> fontsDirectory = new List<string>();
+            License license = new License();
+            license.SetLicense(globalConfiguration.Application.LicensePath);
             if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
             {
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
@@ -162,25 +161,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 }
                 // return document description
                 return Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);
-            }
-            catch (InvalidPasswordException ex)
-            {
-                if (String.IsNullOrEmpty(password))
-                {
-                    InvalidOperationException error = new InvalidOperationException(PASSWORD_REQUIRED);
-                    return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(error, password));
-                }
-                else
-                {
-                    InvalidOperationException error = new InvalidOperationException(INCORRECT_PASSWORD);
-                    return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(error, password));
-                }
-            }
+            }          
             catch (System.Exception ex)
             {
-
                 // set exception message
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex, password));
             }
         }
 
@@ -193,12 +178,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("loadDocumentPage")]
         public HttpResponseMessage LoadDocumentPage(PostedDataEntity postedData)
         {
+            string password = "";
             try
             {
                 // get/set parameters
                 string documentGuid = postedData.guid;
                 int pageNumber = postedData.page;
-                string password = postedData.password;
+                password = postedData.password;
                 LoadedPageEntity loadedPage = new LoadedPageEntity();
                 // get document info options
                 DocumentInfoOptions documentInfoOptions = new DocumentInfoOptions(documentGuid);
@@ -253,7 +239,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             catch (System.Exception ex)
             {
                 // set exception message
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex, password));
             }
         }
 
