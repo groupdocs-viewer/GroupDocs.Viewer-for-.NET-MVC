@@ -46,8 +46,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             config.EnableCaching = globalConfiguration.Viewer.GetCache();
             config.ForcePasswordValidation = true;
             List<string> fontsDirectory = new List<string>();
-            License license = new License();
-            license.SetLicense(globalConfiguration.Application.LicensePath);
             if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
             {
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
@@ -403,16 +401,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
                 HtmlOptions htmlOptions = new HtmlOptions();
-
-                htmlOptions.PageNumber = page.Number;
-                htmlOptions.CountPagesToRender = 1;
-
-                htmlOptions.EmbedResources = true;
-                // set password for protected document
-                if (!string.IsNullOrEmpty(password))
-                {
-                    htmlOptions.Password = password;
-                }
+                SetOptions(htmlOptions, password, page.Number);
                 // get page HTML              
                 return this.GetHandler().GetPages(documentGuid, htmlOptions)[0].HtmlContent;
 
@@ -420,13 +409,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             else
             {
                 ImageOptions imageOptions = new ImageOptions();
-                imageOptions.PageNumber = page.Number;
-                imageOptions.CountPagesToRender = 1;
-                // set password for protected document
-                if (!string.IsNullOrEmpty(password))
-                {
-                    imageOptions.Password = password;
-                }
+                SetOptions(imageOptions, password, page.Number);
                 byte[] bytes;
                 using (var memoryStream = new MemoryStream())
                 {
@@ -444,28 +427,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
                 HtmlOptions htmlOptions = new HtmlOptions();
-                htmlOptions.EmbedResources = true;
-                // set password for protected document
-                if (!string.IsNullOrEmpty(password))
-                {
-                    htmlOptions.Password = password;
-                }
+                SetOptions(htmlOptions, password, 0);
                 // get page HTML              
                 var pages = this.GetHandler().GetPages(documentGuid, htmlOptions);
                 for (int i = 0; i < pages.Count; i++)
                 {
                     allPages.Add(pages[i].HtmlContent);
                 }
-
             }
             else
             {
                 ImageOptions imageOptions = new ImageOptions();
-                // set password for protected document
-                if (!string.IsNullOrEmpty(password))
-                {
-                    imageOptions.Password = password;
-                }
+                SetOptions(imageOptions, password, 0);
                 var pages = this.GetHandler().GetPages(documentGuid, imageOptions);
                 for (int i = 0; i < pages.Count; i++)
                 {
@@ -480,6 +453,61 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 }
             }
             return allPages;
+        }
+
+        private void SetOptions(HtmlOptions options, string password, int pageNumber)
+        {
+            Watermark watermark = null;
+            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
+            {
+                // Set watermark properties
+                watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
+                watermark.Color = System.Drawing.Color.Blue;
+                watermark.Position = WatermarkPosition.Diagonal;
+                watermark.Width = 100;
+            }
+            options.EmbedResources = true;
+            // set password for protected document
+            if (!string.IsNullOrEmpty(password))
+            {
+                options.Password = password;
+            }
+            if (watermark != null)
+            {
+                options.Watermark = watermark;
+            }
+            if (pageNumber != 0)
+            {
+                options.PageNumber = pageNumber;
+                options.CountPagesToRender = 1;
+            }
+        }
+
+        private void SetOptions(ImageOptions options, string password, int pageNumber)
+        {
+            Watermark watermark = null;
+            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
+            {
+                // Set watermark properties
+                watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
+                watermark.Color = System.Drawing.Color.Blue;
+                watermark.Position = WatermarkPosition.Diagonal;
+                watermark.Width = 100;
+            }
+            // set password for protected document
+            if (!string.IsNullOrEmpty(password))
+            {
+                options.Password = password;
+            }
+            if (watermark != null)
+            {
+                options.Watermark = watermark;
+            }
+            if (pageNumber != 0)
+            {
+                options.PageNumber = pageNumber;
+                options.CountPagesToRender = 1;
+            }
         }
     }
 }
