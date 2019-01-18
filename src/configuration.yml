@@ -78,3 +78,5 @@ viewer:
   # Using cache
   # Set true to enable cache
   cache: true
+  # Set true to enable page rotation saving
+  saveRotateState: true
