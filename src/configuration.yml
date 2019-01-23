@@ -41,7 +41,7 @@ common:
   # File browser
   # Set false to disable document browse
   browse: true
-  # Set false to allow right mouse click
+  # Set false to disable right mouse click
   enableRightClick: true
 
 ################################################
