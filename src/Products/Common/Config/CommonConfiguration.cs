@@ -16,6 +16,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         public bool isPrint { get; set; }
         public bool isBrowse { get; set; }
         public bool isRewrite { get; set; }
+        public bool enableRightClick { get; set; }
         private NameValueCollection commonConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("commonConfiguration");
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
             isPrint = valuesGetter.GetBooleanPropertyValue("print", Convert.ToBoolean(commonConfiguration["isPrint"]));
             isBrowse = valuesGetter.GetBooleanPropertyValue("browse", Convert.ToBoolean(commonConfiguration["isBrowse"]));
             isRewrite = valuesGetter.GetBooleanPropertyValue("rewrite", Convert.ToBoolean(commonConfiguration["isRewrite"]));
+            enableRightClick = valuesGetter.GetBooleanPropertyValue("enableRightClick", Convert.ToBoolean(commonConfiguration["enableRightClick"]));
         }
     }
 }
