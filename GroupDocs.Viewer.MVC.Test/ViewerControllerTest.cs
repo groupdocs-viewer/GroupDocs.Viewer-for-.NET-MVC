@@ -5,6 +5,7 @@ using MvcContrib.TestHelper;
 using Huygens;
 using System;
 using GroupDocs.Viewer.MVC;
+using System.Collections.Generic;
 
 namespace GroupDocs.Viewer.MVC.Test
 {
@@ -46,6 +47,27 @@ namespace GroupDocs.Viewer.MVC.Test
         public void ViewMapControllerTest()
         {
             "~/viewer".Route().ShouldMapTo<ViewerController>(x => x.Index());
+        }
+
+        [Test]
+        public void FileTreeStatusCodeTest()
+        {
+            string path = AppDomain.CurrentDomain.BaseDirectory + "/../../../src";
+            using (var server = new DirectServer(path))
+            {
+                var request = new SerialisableRequest
+                {
+                    Method = "POST",
+                    RequestUri = "/loadfiletree",
+                    Content = null,
+                    Headers = new Dictionary<string, string>{
+                        { "Content-Type", "application/json"}
+                    }
+                };
+
+                var result = server.DirectCall(request);
+                Assert.That(result.StatusCode, Is.EqualTo(200));
+            }
         }
     }
 }
