@@ -13,6 +13,20 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         [JsonProperty]
         private List<PageDescriptionEntity> pages = new List<PageDescriptionEntity>();
 
+        ///Document Guid
+        [JsonProperty]
+        private bool printAllowed = true;
+
+        public void SetPrintAllowed(bool allowed)
+        {
+            this.printAllowed = allowed;
+        }
+
+        public bool GetPrintAllowed()
+        {
+            return this.printAllowed;
+        }
+
         public void SetGuid(string guid)
         {
             this.guid = guid;

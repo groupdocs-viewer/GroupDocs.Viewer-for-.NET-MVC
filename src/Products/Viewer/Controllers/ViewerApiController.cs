@@ -340,19 +340,27 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             // get/set parameters
             string documentGuid = postedData.guid;
             string password = (String.IsNullOrEmpty(postedData.password)) ? null : postedData.password;
+            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
             // check if documentGuid contains path or only file name
             if (!Path.IsPathRooted(documentGuid))
             {
                 documentGuid = globalConfiguration.Viewer.GetFilesDirectory() + "/" + documentGuid;
             }
-            DocumentInfoContainer documentInfoContainer;
+            dynamic documentInfoContainer;
             // get document info options
             DocumentInfoOptions documentInfoOptions = new DocumentInfoOptions();
             // set password for protected document                
             documentInfoOptions.Password = password;
-            // get document info container               
-            documentInfoContainer = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions);
-            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
+            // get document info container              
+            if (Path.GetExtension(documentGuid) == ".pdf" && globalConfiguration.Viewer.GetPrintAllowed())
+            {
+                documentInfoContainer = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions) as PdfDocumentInfoContainer;
+                loadDocumentEntity.SetPrintAllowed(documentInfoContainer.PrintingAllowed);
+            }
+            else
+            {
+                documentInfoContainer = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions);
+            }
             List<string> pagesContent = new List<string>();
             if (loadAllPages)
             {
