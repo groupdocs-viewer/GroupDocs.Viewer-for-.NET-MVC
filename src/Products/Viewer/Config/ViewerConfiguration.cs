@@ -23,6 +23,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         private bool isHtmlMode = true;
         private bool Cache = true;
         private bool SaveRotateState = true;
+        private bool PrintAllowed = true;
 
         /// <summary>
         /// Constructor
@@ -54,6 +55,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
             Cache = valuesGetter.GetBooleanPropertyValue("cache", Cache);
             SaveRotateState = valuesGetter.GetBooleanPropertyValue("saveRotateState", SaveRotateState);
             WatermarkText = valuesGetter.GetStringPropertyValue("watermarkText", WatermarkText);
+            PrintAllowed = valuesGetter.GetBooleanPropertyValue("printAllowed", PrintAllowed);
         }
 
         private static bool IsFullPath(string path)
@@ -182,6 +184,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         public string GetWatermarkText()
         {
             return WatermarkText;
+        }
+
+        public void SetPrintAllowed(bool printAllowed)
+        {
+            this.PrintAllowed = printAllowed;
+        }
+
+        public bool GetPrintAllowed()
+        {
+            return PrintAllowed;
         }
     }
 }
