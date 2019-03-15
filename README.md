@@ -49,21 +49,32 @@ https://www.youtube.com/watch?v=NnZaMNUC6o0
 
 
 ## How to run
-1. Download/Clone GroupDocs.Viewer for .NET MVC Example.
-2. Extract/Copy GroupDocs.Viewer for .NET MVC Example to working directory.
-3. Navigate to GroupDocs.Viewer for .NET MVC Example root directory.
-4. Open project in Visual Studio.
-5. Update params in `Web.config` to meet your requirements.
-6. Start solution.
-7. Go to `http://localhost:{PORT}/viewer/`.
-PORT - port number specified in `Web.config` (by default http://localhost:8080/viewer/).
 
-## How to run in standalone mode
-1. Navigate to GroupDocs.Viewer for .NET MVC Sample root directory.
-2. Update parameters in `web.config` to meet your requirements.
-3. Execute the 'LaunchServer.bat' file.
-4. Go to `http://localhost:{PORT}/`.
-PORT - port number specified in `web.config` and in 'LaunchServer.bat'(by default http://localhost:8080).
+You can run this sample by one of following methods
+
+#### Build from source
+
+Download [source code](https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC/archive/master.zip) from github or clone this repository.
+
+```bash
+git clone https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC
+```
+
+Open solution in the VisualStudio.
+Update common parameters in `web.config` and example related properties in the `configuration.yml` to meet your requirements.
+
+Open http://localhost:8080/Viewer in your favorite browser
+
+#### Docker image
+Use [docker](https://www.docker.com/) image.
+
+```bash
+mkdir DocumentSamples
+mkdir Licenses
+docker run -p 8080:8080 --env application.hostAddress=localhost -v `pwd`/DocumentSamples:/home/groupdocs/app/DocumentSamples -v `pwd`/Licenses:/home/groupdocs/app/Licenses groupdocs/Viewer
+## Open http://localhost:8080/Viewer in your favorite browser.
+```
+
 
 ## Resources
 - **Website:** [www.groupdocs.com](http://www.groupdocs.com)
