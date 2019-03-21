@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-MVC#readme",
   "dependencies": {
-    "@groupdocs.examples.jquery/common": "^0.10.0",
-    "@groupdocs.examples.jquery/viewer": "^0.10.0"
+    "@groupdocs.examples.jquery/common": "^0.11.0",
+    "@groupdocs.examples.jquery/viewer": "^0.11.0"
   },
   "devDependencies": {
     "gulp": "^4.0.0"
