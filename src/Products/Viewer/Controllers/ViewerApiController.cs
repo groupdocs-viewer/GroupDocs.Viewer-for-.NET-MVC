@@ -353,30 +353,29 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("printPdf")]
-        public HttpResponseMessage PrintPdf(string guid)
+        public HttpResponseMessage PrintPdf(PostedDataEntity loadDocumentRequest)
         {
-            string pdfPath = Path.Combine(globalConfiguration.Viewer.GetFilesDirectory(), guid);
-            if (!File.Exists(pdfPath))
+            // get document path
+            string documentGuid = loadDocumentRequest.guid;
+            string fileName = Path.GetFileName(documentGuid);
+            try
             {
-                string[] filePaths = Directory.GetFiles(globalConfiguration.Viewer.GetFilesDirectory(), "*.pdf",
-                                         SearchOption.AllDirectories);
-                foreach (string path in filePaths)
-                {
-                    if (Path.GetFileName(path).Equals(guid))
-                    {
-                        pdfPath = path;
-                    }
-                }
+                var fileStream = new FileStream(documentGuid, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+                response.Content = new StreamContent(fileStream);
+                // add file into the response
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(fileName);
+                return response;
             }
-            HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
-            var fileStream = new FileStream(pdfPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            response.Content = new StreamContent(fileStream);
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
-            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("inline");
-            response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(pdfPath);
-            return response;
+            catch (System.Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+            }
         }
 
         private LoadDocumentEntity LoadDocument(PostedDataEntity postedData, bool loadAllPages)
