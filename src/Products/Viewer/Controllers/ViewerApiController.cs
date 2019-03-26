@@ -341,14 +341,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadPrintDocument = new LoadDocumentEntity();
-                if (Path.GetExtension(loadDocumentRequest.guid) == ".pdf") {
-                    loadPrintDocument = GetPrintPdf(loadDocumentRequest.guid);
-                } else {
-                    loadPrintDocument = LoadDocument(loadDocumentRequest, true);
-                }
+                LoadDocumentEntity loadPrintDocument = LoadDocument(loadDocumentRequest, true);
                 // return document description
                 return Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
+
             }
             catch (System.Exception ex)
             {
@@ -357,13 +353,29 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private LoadDocumentEntity GetPrintPdf(string guid)
+        [HttpPost]
+        [Route("printPdf")]
+        public HttpResponseMessage PrintPdf(PostedDataEntity loadDocumentRequest)
         {
-            string pdfPath = globalConfiguration.Viewer.GetFilesDirectory().Replace(AppDomain.CurrentDomain.BaseDirectory, "") + 
-                "/" + Path.GetFileName(guid);
-            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
-            loadDocumentEntity.SetGuid(pdfPath);
-            return loadDocumentEntity;
+            // get document path
+            string documentGuid = loadDocumentRequest.guid;
+            string fileName = Path.GetFileName(documentGuid);
+            try
+            {
+                var fileStream = new FileStream(documentGuid, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+                response.Content = new StreamContent(fileStream);
+                // add file into the response
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(fileName);
+                return response;
+            }
+            catch (System.Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+            }
         }
 
         private LoadDocumentEntity LoadDocument(PostedDataEntity postedData, bool loadAllPages)
