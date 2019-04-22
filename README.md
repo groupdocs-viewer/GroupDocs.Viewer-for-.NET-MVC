@@ -11,7 +11,7 @@
 - Visual Studio 2015
 
 
-## Description
+## Document viewer web application
 This app is a **document viewer** that gives you the ability to view over 50 document formats including popular Office files (Word, Excel, PowerPoint) and many others directly in your browser. It is possible to **view documents as images or render them as HTML5**. Using [GroupDocs.Viewer for .NET](https://products.groupdocs.com/viewer/net) API  allows us to view any from 50 supported document formats without external dependencies and need to convert files to PDF first.
 
 **Note** Without a license application will run in trial mode, purchase [GroupDocs.Viewer for .NET license](https://purchase.groupdocs.com/order-online-step-1-of-8.aspx) or request [GroupDocs.Viewer for .NET temporary license](https://purchase.groupdocs.com/temporary-license).
