@@ -18,7 +18,7 @@ This app is a **document viewer** that gives you the ability to view over 50 doc
 
 
 ## Demo Video
-[![Document viewer](https://img.youtube.com/vi/NnZaMNUC6o0/0.jpg)](https://www.youtube.com/watch?v=NnZaMNUC6o0)
+[![Document viewer](https://raw.githubusercontent.com/groupdocs-viewer/groupdocs-viewer.github.io/master/resources/image/document-viewer-demo.gif)](https://www.youtube.com/watch?v=NnZaMNUC6o0)
 
 
 ## Features
