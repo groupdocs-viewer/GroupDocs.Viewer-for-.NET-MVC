@@ -1,5 +1,6 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Parser;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
@@ -9,21 +10,46 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
     /// <summary>
     /// ViewerConfiguration
     /// </summary>
-    public class ViewerConfiguration
+    public class ViewerConfiguration : CommonConfiguration
     {
-        private string FilesDirectory = "DocumentSamples/Viewer";
-        private string FontsDirectory = "";
-        private string DefaultDocument = "";
-        private string WatermarkText = "";
-        private int PreloadPageCount = 0;
-        private bool isZoom = true;
-        private bool isSearch = true;
-        private bool isThumbnails = true;
-        private bool isRotate = true;
-        private bool isHtmlMode = true;
-        private bool Cache = true;
-        private bool SaveRotateState = true;
-        private bool PrintAllowed = true;
+        [JsonProperty]
+        private string filesDirectory = "DocumentSamples/Viewer";
+
+        [JsonProperty]
+        private string fontsDirectory = "";
+
+        [JsonProperty]
+        private string defaultDocument = "";
+
+        [JsonProperty]
+        private string watermarkText = "";
+
+        [JsonProperty]
+        private int preloadPageCount;
+
+        [JsonProperty]
+        private bool zoom = true;
+
+        [JsonProperty]
+        private bool search = true;
+
+        [JsonProperty]
+        private bool thumbnails = true;
+
+        [JsonProperty]
+        private bool rotate = true;
+
+        [JsonProperty]
+        private bool htmlMode = true;
+
+        [JsonProperty]
+        private bool cache = true;
+
+        [JsonProperty]
+        private bool saveRotateState = true;
+
+        [JsonProperty]
+        private bool printAllowed = true;
 
         /// <summary>
         /// Constructor
@@ -35,27 +61,27 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
             ConfigurationValuesGetter valuesGetter = new ConfigurationValuesGetter(configuration);
 
             // get Viewer configuration section from the web.config
-            FilesDirectory = valuesGetter.GetStringPropertyValue("filesDirectory", FilesDirectory);
-            if (!IsFullPath(FilesDirectory))
+            filesDirectory = valuesGetter.GetStringPropertyValue("filesDirectory", filesDirectory);
+            if (!IsFullPath(filesDirectory))
             {
-                FilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FilesDirectory);
-                if (!Directory.Exists(FilesDirectory))
+                filesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filesDirectory);
+                if (!Directory.Exists(filesDirectory))
                 {
-                    Directory.CreateDirectory(FilesDirectory);
+                    Directory.CreateDirectory(filesDirectory);
                 }
             }
-            FontsDirectory = valuesGetter.GetStringPropertyValue("fontsDirectory", FontsDirectory);
-            DefaultDocument = valuesGetter.GetStringPropertyValue("defaultDocument", DefaultDocument);
-            PreloadPageCount = valuesGetter.GetIntegerPropertyValue("preloadPageCount", PreloadPageCount);
-            isZoom = valuesGetter.GetBooleanPropertyValue("zoom", isZoom);
-            isSearch = valuesGetter.GetBooleanPropertyValue("search", isSearch);
-            isThumbnails = valuesGetter.GetBooleanPropertyValue("thumbnails", isThumbnails);
-            isRotate = valuesGetter.GetBooleanPropertyValue("rotate", isRotate);
-            isHtmlMode = valuesGetter.GetBooleanPropertyValue("htmlMode", isHtmlMode);
-            Cache = valuesGetter.GetBooleanPropertyValue("cache", Cache);
-            SaveRotateState = valuesGetter.GetBooleanPropertyValue("saveRotateState", SaveRotateState);
-            WatermarkText = valuesGetter.GetStringPropertyValue("watermarkText", WatermarkText);
-            PrintAllowed = valuesGetter.GetBooleanPropertyValue("printAllowed", PrintAllowed);
+            fontsDirectory = valuesGetter.GetStringPropertyValue("fontsDirectory", fontsDirectory);
+            defaultDocument = valuesGetter.GetStringPropertyValue("defaultDocument", defaultDocument);
+            preloadPageCount = valuesGetter.GetIntegerPropertyValue("preloadPageCount", preloadPageCount);
+            zoom = valuesGetter.GetBooleanPropertyValue("zoom", zoom);
+            search = valuesGetter.GetBooleanPropertyValue("search", search);
+            thumbnails = valuesGetter.GetBooleanPropertyValue("thumbnails", thumbnails);
+            rotate = valuesGetter.GetBooleanPropertyValue("rotate", rotate);
+            htmlMode = valuesGetter.GetBooleanPropertyValue("htmlMode", htmlMode);
+            cache = valuesGetter.GetBooleanPropertyValue("cache", cache);
+            saveRotateState = valuesGetter.GetBooleanPropertyValue("saveRotateState", saveRotateState);
+            watermarkText = valuesGetter.GetStringPropertyValue("watermarkText", watermarkText);
+            printAllowed = valuesGetter.GetBooleanPropertyValue("printAllowed", printAllowed);
         }
 
         private static bool IsFullPath(string path)
@@ -68,132 +94,132 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public void SetFilesDirectory(string filesDirectory)
         {
-            this.FilesDirectory = filesDirectory;
+            this.filesDirectory = filesDirectory;
         }
 
         public string GetFilesDirectory()
         {
-            return FilesDirectory;
+            return filesDirectory;
         }
 
         public void SetFontsDirectory(string fontsDirectory)
         {
-            this.FontsDirectory = fontsDirectory;
+            this.fontsDirectory = fontsDirectory;
         }
 
         public string GetFontsDirectory()
         {
-            return FontsDirectory;
+            return fontsDirectory;
         }
 
         public void SetDefaultDocument(string defaultDocument)
         {
-            this.DefaultDocument = defaultDocument;
+            this.defaultDocument = defaultDocument;
         }
 
         public string GetDefaultDocument()
         {
-            return DefaultDocument;
+            return defaultDocument;
         }
 
         public void SetPreloadPageCount(int preloadPageCount)
         {
-            this.PreloadPageCount = preloadPageCount;
+            this.preloadPageCount = preloadPageCount;
         }
 
         public int GetPreloadPageCount()
         {
-            return PreloadPageCount;
+            return preloadPageCount;
         }
 
         public void SetIsZoom(bool isZoom)
         {
-            this.isZoom = isZoom;
+            this.zoom = isZoom;
         }
 
         public bool GetIsZoom()
         {
-            return isZoom;
+            return zoom;
         }
 
         public void SetIsSearch(bool isSearch)
         {
-            this.isSearch = isSearch;
+            this.search = isSearch;
         }
 
         public bool GetIsSearch()
         {
-            return isSearch;
+            return search;
         }
 
         public void SetIsThumbnails(bool isThumbnails)
         {
-            this.isThumbnails = isThumbnails;
+            this.thumbnails = isThumbnails;
         }
 
         public bool GetIsThumbnails()
         {
-            return isThumbnails;
+            return thumbnails;
         }
 
         public void SetIsRotate(bool isRotate)
         {
-            this.isRotate = isRotate;
+            this.rotate = isRotate;
         }
 
         public bool GetIsRotate()
         {
-            return isRotate;
+            return rotate;
         }
 
         public void SetIsHtmlMode(bool isHtmlMode)
         {
-            this.isHtmlMode = isHtmlMode;
+            this.htmlMode = isHtmlMode;
         }
 
         public bool GetIsHtmlMode()
         {
-            return isHtmlMode;
+            return htmlMode;
         }
 
         public void SetCache(bool Cache)
         {
-            this.Cache = Cache;
+            this.cache = Cache;
         }
 
         public bool GetCache()
         {
-            return Cache;
+            return cache;
         }
 
         public void SetSaveRotateState(bool saveRotateState)
         {
-            this.SaveRotateState = saveRotateState;
+            this.saveRotateState = saveRotateState;
         }
 
         public bool GetSaveRotateState()
         {
-            return SaveRotateState;
+            return saveRotateState;
         }
 
         public void SetWatermarkText(string watermarkText)
         {
-            this.WatermarkText = watermarkText;
+            this.watermarkText = watermarkText;
         }
 
         public string GetWatermarkText()
         {
-            return WatermarkText;
+            return watermarkText;
         }
 
         public void SetPrintAllowed(bool printAllowed)
         {
-            this.PrintAllowed = printAllowed;
+            this.printAllowed = printAllowed;
         }
 
         public bool GetPrintAllowed()
         {
-            return PrintAllowed;
+            return printAllowed;
         }
     }
 }

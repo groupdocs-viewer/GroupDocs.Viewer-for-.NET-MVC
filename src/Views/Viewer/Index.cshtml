@@ -6,39 +6,16 @@
 <head>
     <meta charset="utf-8" />
     <title>Viewer for .NET MVC</title>
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/common/css/all.min.css">
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/common/css/v4-shims.min.css">
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/common/css/swiper.min.css">
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/common/css/circle-progress.css" />
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/viewer/css/viewer.css" />
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/viewer/css/viewer.mobile.css" />
-    <link type="text/css" rel="stylesheet" href="/viewer/resources/viewer/css/viewer-dark.css" />
-    <script type="text/javascript" src="/viewer/resources/common/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/viewer/resources/common/js/swiper.min.js"></script>
-    <script type="text/javascript" src="/viewer/resources/common/js/es6-promise.auto.js"></script>
-    <script type="text/javascript" src="/viewer/resources/viewer/js/viewer.js"></script>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/resources/viewer/dist/assets/css/all.min.css" />
 </head>
 <body>
-    <div id="element"></div>
-    <script type="text/javascript">
-        $('#element').viewer({
-            applicationPath: 'http://@config.Server.HostAddress:@config.Server.HttpPort/viewer',
-            defaultDocument: '@config.Viewer.GetDefaultDocument()',
-            htmlMode: @config.Viewer.GetIsHtmlMode().ToString().ToLowerInvariant(),
-            preloadPageCount: @config.Viewer.GetPreloadPageCount(),
-            zoom : @config.Viewer.GetIsZoom().ToString().ToLowerInvariant(),
-            pageSelector: @config.Common.isPageSelector.ToString().ToLowerInvariant(),
-            search: @config.Viewer.GetIsSearch().ToString().ToLowerInvariant(),
-            thumbnails: @config.Viewer.GetIsThumbnails().ToString().ToLowerInvariant(),
-            rotate: @config.Viewer.GetIsRotate().ToString().ToLowerInvariant(),
-            download: @config.Common.isDownload.ToString().ToLowerInvariant(),
-            upload: @config.Common.isUpload.ToString().ToLowerInvariant(),
-            print: @config.Common.isPrint.ToString().ToLowerInvariant(),
-            browse: @config.Common.isBrowse.ToString().ToLowerInvariant(),
-            rewrite: @config.Common.isRewrite.ToString().ToLowerInvariant(),
-            saveRotateState: @config.Viewer.GetSaveRotateState().ToString().ToLowerInvariant(),
-            enableRightClick: @config.Common.enableRightClick.ToString().ToLowerInvariant()
-            });
-    </script>
+    <gd-viewer-angular-root></gd-viewer-angular-root>
+    <script type="text/javascript" src="/resources/viewer/dist/runtime.js"></script>
+    <script type="text/javascript" src="/resources/viewer/dist/es2015-polyfills.js" nomodule></script>
+    <script type="text/javascript" src="/resources/viewer/dist/polyfills.js"></script>
+    <script type="text/javascript" src="/resources/viewer/dist/styles.js"></script>
+    <script type="text/javascript" src="/resources/viewer/dist/scripts.js"></script>    
+    <script type="text/javascript" src="/resources/viewer/dist/main.js"></script>
 </body>
 </html>
