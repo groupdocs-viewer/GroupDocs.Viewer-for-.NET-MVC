@@ -25,7 +25,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         private string watermarkText = "";
 
         [JsonProperty]
-        private int preloadPageCount = 0;
+        private int preloadPageCount;
 
         [JsonProperty]
         private bool zoom = true;
