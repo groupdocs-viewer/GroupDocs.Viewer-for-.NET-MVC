@@ -16,6 +16,7 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using GroupDocs.Viewer.MVC.Products.Viewer.Config;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -60,6 +61,17 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // initialize Viewer instance for the Image mode
                 viewerImageHandler = new ViewerImageHandler(config);
             }
+        }
+
+        /// <summary>
+        /// Load Viewr configuration
+        /// </summary>       
+        /// <returns>Viewer configuration</returns>
+        [HttpGet]
+        [Route("loadConfig")]
+        public ViewerConfiguration LoadConfig()
+        {            
+            return globalConfiguration.Viewer;
         }
 
         /// <summary>
