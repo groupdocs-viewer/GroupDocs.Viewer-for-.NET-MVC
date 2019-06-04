@@ -543,6 +543,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 options.PageNumber = pageNumber;
                 options.CountPagesToRender = 1;
             }
+            options.CellsOptions.ShowGridLines = true;
         }
 
         private void SetOptions(ImageOptions options, string password, int pageNumber)
@@ -570,6 +571,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 options.PageNumber = pageNumber;
                 options.CountPagesToRender = 1;
             }
+            options.CellsOptions.ShowGridLines = true;
         }
     }
 }
