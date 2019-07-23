@@ -68,7 +68,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// </summary>       
         /// <returns>Viewer configuration</returns>
         [HttpGet]
-        [Route("viewer/loadConfig")]
+        [Route("loadConfig")]
         public ViewerConfiguration LoadConfig()
         {            
             return globalConfiguration.Viewer;
@@ -80,7 +80,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Post data</param>
         /// <returns>List of files and directories</returns>
         [HttpPost]
-        [Route("viewer/loadFileTree")]
+        [Route("loadFileTree")]
         public HttpResponseMessage loadFileTree(PostedDataEntity postedData)
         {
             string relDirPath = "";
@@ -139,7 +139,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Post data</param>
         /// <returns>Document info object</returns>
         [HttpPost]
-        [Route("viewer/loadDocumentDescription")]
+        [Route("loadDocumentDescription")]
         public HttpResponseMessage LoadDocumentDescription(PostedDataEntity postedData)
         {
             string password = "";
@@ -162,7 +162,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Post data</param>
         /// <returns>Document page object</returns>
         [HttpPost]
-        [Route("viewer/loadDocumentPage")]
+        [Route("loadDocumentPage")]
         public HttpResponseMessage LoadDocumentPage(PostedDataEntity postedData)
         {
             string password = "";
@@ -198,7 +198,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Document page number to rotate and rotation angle</param>
         /// <returns>Rotated document page object</returns>
         [HttpPost]
-        [Route("viewer/rotateDocumentPages")]
+        [Route("rotateDocumentPages")]
         public HttpResponseMessage RotateDocumentPages(PostedDataEntity postedData)
         {
             try
@@ -251,7 +251,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="path">Path of the document to download</param>
         /// <returns>Document stream as attachement</returns>
         [HttpGet]
-        [Route("viewer/downloadDocument")]
+        [Route("downloadDocument")]
         public HttpResponseMessage DownloadDocument(string path)
         {
             if (!string.IsNullOrEmpty(path))
@@ -276,7 +276,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Post data</param>
         /// <returns>Uploaded document object</returns>
         [HttpPost]
-        [Route("viewer/uploadDocument")]
+        [Route("uploadDocument")]
         public HttpResponseMessage UploadDocument()
         {
             try
@@ -341,14 +341,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         [HttpPost]
-        [Route("viewer/loadThumbnails")]
+        [Route("loadThumbnails")]
         public LoadDocumentEntity loadThumbnails(PostedDataEntity loadDocumentRequest)
         {
             return LoadDocument(loadDocumentRequest, true);
         }
 
         [HttpPost]
-        [Route("viewer/loadPrint")]
+        [Route("loadPrint")]
         public HttpResponseMessage loadPrint(PostedDataEntity loadDocumentRequest)
         {
             try
@@ -366,7 +366,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         [HttpPost]
-        [Route("viewer/printPdf")]
+        [Route("printPdf")]
         public HttpResponseMessage PrintPdf(PostedDataEntity loadDocumentRequest)
         {
             // get document path
