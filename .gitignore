@@ -1,8 +1,8 @@
 /packages
 /.vs
 /src/GroupDocs.Viewer.MVC.csproj.user
-/src/bin
-/src/obj
+bin
+obj
 /App_Data/temp
 src/Resources/*
 !src/Resources/.gitkeep
