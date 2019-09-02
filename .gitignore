@@ -10,6 +10,7 @@ node_modules
 src/package-lock.json
 /src/client/package-lock.json
 /src/node
+src/DocumentSamples
 !src/DocumentSamples/Viewer/.gitkeep
 src/Licenses
 !src/Licenses/.gitkeep
