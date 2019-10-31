@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace GroupDocs.Total.MVC.Products.Common.Util.Comparator
+namespace GroupDocs.Viewer.MVC.Products.Common.Util.Comparator
 {
     /// <summary>
     /// FileDateComparator
