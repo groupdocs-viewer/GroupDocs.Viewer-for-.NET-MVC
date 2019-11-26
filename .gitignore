@@ -1,17 +1,33 @@
-/packages
-/.vs
-/src/GroupDocs.Viewer.MVC.csproj.user
-bin
-obj
-/App_Data/temp
+# Tool Runtime Dir
+packages/
+node_modules/
+
+# Visual Studio
+.vs/
+
+# User-specific files
+*.user
+
+# Build results
+[Bb]in/
+[Oo]bj/
+*.zip
+package-lock.json
+
+# Resources
 src/Resources/*
 !src/Resources/.gitkeep
-node_modules
-src/package-lock.json
-/src/client/package-lock.json
-/src/node
-src/DocumentSamples
-!src/DocumentSamples/Viewer/.gitkeep
+
+# Licenses
 src/Licenses
 !src/Licenses/.gitkeep
-/src/node
+
+# Document samples
+src/DocumentSamples
+!src/DocumentSamples/.gitkeep
+
+# Git
+!.gitkeep
+
+# Finder in OSX
+.DS_Store
