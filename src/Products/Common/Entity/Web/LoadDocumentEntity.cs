@@ -17,6 +17,10 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         [JsonProperty]
         private bool printAllowed = true;
 
+        ///Document Guid
+        [JsonProperty]
+        private bool showGridLines = true;
+
         public void SetPrintAllowed(bool allowed)
         {
             this.printAllowed = allowed;
@@ -25,6 +29,16 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         public bool GetPrintAllowed()
         {
             return this.printAllowed;
+        }
+
+        public void SetShowGridLines(bool show)
+        {
+            this.showGridLines = show;
+        }
+
+        public bool GetShowGridLines()
+        {
+            return this.showGridLines;
         }
 
         public void SetGuid(string guid)
