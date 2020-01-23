@@ -9,15 +9,15 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         [JsonProperty]
         private string guid;
 
-        ///list of pages        
+        ///List of pages
         [JsonProperty]
         private List<PageDescriptionEntity> pages = new List<PageDescriptionEntity>();
 
-        ///Document Guid
+        ///Print allowed
         [JsonProperty]
         private bool printAllowed = true;
 
-        ///Document Guid
+        ///Show grid lines
         [JsonProperty]
         private bool showGridLines = true;
 
