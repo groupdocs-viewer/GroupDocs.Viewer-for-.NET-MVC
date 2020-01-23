@@ -431,6 +431,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 loadDocumentEntity.SetPages(pageData);
             }
             loadDocumentEntity.SetGuid(documentGuid);
+            loadDocumentEntity.SetShowGridLines(globalConfiguration.Viewer.GetShowGridLines());
             // return document description
             return loadDocumentEntity;
         }
@@ -543,7 +544,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 options.PageNumber = pageNumber;
                 options.CountPagesToRender = 1;
             }
-            options.CellsOptions.ShowGridLines = true;
+            options.CellsOptions.ShowGridLines = globalConfiguration.Viewer.GetShowGridLines();
         }
 
         private void SetOptions(ImageOptions options, string password, int pageNumber)
@@ -571,7 +572,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 options.PageNumber = pageNumber;
                 options.CountPagesToRender = 1;
             }
-            options.CellsOptions.ShowGridLines = true;
+            options.CellsOptions.ShowGridLines = globalConfiguration.Viewer.GetShowGridLines();
         }
     }
 }
