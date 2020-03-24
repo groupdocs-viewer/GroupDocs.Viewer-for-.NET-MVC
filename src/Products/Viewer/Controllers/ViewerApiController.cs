@@ -15,6 +15,8 @@ using GroupDocs.Viewer.Options;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
 using GroupDocs.Viewer.Results;
 using System.Text;
+using System.Globalization;
+using GroupDocs.Viewer;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -37,28 +39,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             License license = new License();
             license.SetLicense(globalConfiguration.Application.LicensePath);
 
-            // create viewer application configuration
-            //ViewerConfig config = new ViewerConfig();
-            //config.StoragePath = globalConfiguration.Viewer.GetFilesDirectory();
-            //config.EnableCaching = globalConfiguration.Viewer.GetCache();
-            //config.ForcePasswordValidation = true;
-
             List<string> fontsDirectory = new List<string>();
             if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
             {
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
             }
-            //config.FontDirectories = fontsDirectory;
-            //if (globalConfiguration.Viewer.GetIsHtmlMode())
-            //{
-            //    // initialize Viewer instance for the HTML mode
-            //    viewerHtmlHandler = new ViewerHtmlHandler(config);
-            //}
-            //else
-            //{
-            //    // initialize Viewer instance for the Image mode
-            //    viewerImageHandler = new ViewerImageHandler(config);
-            //}
         }
 
         /// <summary>
@@ -87,8 +72,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 relDirPath = postedData.path;
             }
-            // get file list from storage path
-            //FileListOptions fileListOptions = new FileListOptions(relDirPath);
 
             try
             {
@@ -202,11 +185,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // get document info options
                 ViewInfo viewInfo = null;
                 // set password for protected document                
-                // TODO: how properly set FileType
-                GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions =
-                        () => new LoadOptions(FileType.DOCX, password); 
+                var loadOptions = GetLoadOptions(documentGuid, password);
 
-                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, getLoadOptions))
+                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
                 {
                     viewInfo = viewer.GetViewInfo(
                         ViewInfoOptions.ForJpgView(false));
@@ -443,31 +424,21 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             dynamic viewInfoJpg = null;
 
             // set password for protected document                
-            GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions =
-                        () => new LoadOptions(FileType.DOCX, password);
-            // get document info container              
-            //if (Path.GetExtension(documentGuid) == ".pdf" && globalConfiguration.Viewer.GetPrintAllowed())
-            //{
-            //    documentInfoContainer = this.GetHandler().GetDocumentInfo(documentGuid, documentInfoOptions) as PdfDocumentInfoContainer;
-            //    loadDocumentEntity.SetPrintAllowed(documentInfoContainer.PrintingAllowed);
-            //}
-            //else
-            //{
-                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, getLoadOptions))
-                {
-                    viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
-                }
+            var loadOptions = GetLoadOptions(documentGuid, password);
 
-                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, getLoadOptions))
-                {
-                    // TODO: check that this is needed
-                    //HtmlViewOptions viewOptions =
-                    //    HtmlViewOptions.ForEmbeddedResources();
+            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
+            {
+                viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+            }
 
-                    viewInfoJpg = viewer.GetViewInfo(
-                        ViewInfoOptions.ForJpgView(false));
-                }
-            //}
+            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
+            {
+                // TODO: check that this is needed
+                //HtmlViewOptions viewOptions =
+                //    HtmlViewOptions.ForEmbeddedResources();
+
+                viewInfoJpg = viewer.GetViewInfo(ViewInfoOptions.ForJpgView(false));
+            }
 
             List<string> pagesContent = new List<string>();
 
@@ -501,8 +472,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return pageDescriptionEntity;
         }
 
-        static string RenderPageToString(int pageNumberToRender, string documentGuid, string password)
+        private string RenderPageToString(int pageNumberToRender, string documentGuid, string password)
         {
+            // TODO: consider adding usage of the RedisCache
             using (MemoryStream pageStream = RenderPageToMemoryStream(pageNumberToRender, password, documentGuid))
             {
                 string html = Encoding.UTF8.GetString(pageStream.ToArray());
@@ -511,15 +483,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        static MemoryStream RenderPageToMemoryStream(int pageNumberToRender, string documentGuid, string password)
+        private MemoryStream RenderPageToMemoryStream(int pageNumberToRender, string documentGuid, string password)
         {
             MemoryStream result = new MemoryStream();
 
-            // TODO: properly set FileType
-            GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions =
-                    () => new LoadOptions(FileType.DOCX, password);
+            var loadOptions = GetLoadOptions(documentGuid, password);
 
-            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, getLoadOptions))
+            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
             {
                 HtmlViewOptions viewOptions =
                     HtmlViewOptions.ForEmbeddedResources(
@@ -528,6 +498,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                         {
                             // Do not close stream as we're about to read from it
                         });
+
+                SetWatermarkOptions(viewOptions);
 
                 viewer.View(viewOptions, pageNumberToRender);
             }
@@ -542,19 +514,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // get page HTML
                 return RenderPageToString(page.Number, password, documentGuid);
             }
-            //else
-            //{
-            //    ImageOptions imageOptions = new ImageOptions();
-            //    SetOptions(imageOptions, password, page.Number);
-            //    byte[] bytes;
-            //    using (var memoryStream = new MemoryStream())
-            //    {
-            //        this.GetHandler().GetPages(documentGuid, imageOptions)[0].Stream.CopyTo(memoryStream);
-            //        bytes = memoryStream.ToArray();
-            //    }
-            //    string encodedImage = Convert.ToBase64String(bytes);
-            //    return encodedImage;
-            //}
 
             return page.Lines.ToString();
         }
@@ -570,83 +529,65 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     allPages.Add(RenderPageToString(pages[i].Number, password, documentGuid));
                 }
             }
-            else
-            {
-                //ImageOptions imageOptions = new ImageOptions();
-                //SetOptions(imageOptions, password, 0);
-                //var pages = this.GetHandler().GetPages(documentGuid, imageOptions);
-                //for (int i = 0; i < pages.Count; i++)
-                //{
-                //    byte[] bytes;
-                //    using (var memoryStream = new MemoryStream())
-                //    {
-                //        pages[i].Stream.CopyTo(memoryStream);
-                //        bytes = memoryStream.ToArray();
-                //    }
-                //    string encodedImage = Convert.ToBase64String(bytes);
-                //    allPages.Add(encodedImage);
-                //}
-            }
 
             return allPages;
         }
 
-        //private void SetOptions(HtmlOptions options, string password, int pageNumber)
-        //{
-        //    Watermark watermark = null;
-        //    if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
-        //    {
-        //        // Set watermark properties
-        //        watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
-        //        watermark.Color = System.Drawing.Color.Blue;
-        //        watermark.Position = WatermarkPosition.Diagonal;
-        //        watermark.Width = 100;
-        //    }
-        //    TODO: ???
-        //   options.EmbedResources = true;
-        //    set password for protected document
-        //    if (!string.IsNullOrEmpty(password))
-        //    {
-        //        options.Password = password;
-        //    }
-        //    if (watermark != null)
-        //    {
-        //        options.Watermark = watermark;
-        //    }
-        //    if (pageNumber != 0)
-        //    {
-        //        options.PageNumber = pageNumber;
-        //        options.CountPagesToRender = 1;
-        //    }
-        //    options.CellsOptions.ShowGridLines = true;
-        //}
+        private void SetWatermarkOptions(HtmlViewOptions options)
+        {
+            Watermark watermark = null;
+            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
+            {
+                // Set watermark properties
+                watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
+                watermark.Color = System.Drawing.Color.Blue;
+                watermark.Position = Position.Diagonal;
+            }
 
-        //private void SetOptions(ImageOptions options, string password, int pageNumber)
-        //{
-        //    Watermark watermark = null;
-        //    if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
-        //    {
-        //        // Set watermark properties
-        //        watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
-        //        watermark.Color = System.Drawing.Color.Blue;
-        //        watermark.Position = WatermarkPosition.Diagonal;
-        //        watermark.Width = 100;
-        //    }
-        //    // set password for protected document
-        //    if (!string.IsNullOrEmpty(password))
-        //    {
-        //        options.Password = password;
-        //    }
-        //    if (watermark != null)
-        //    {
-        //        options.Watermark = watermark;
-        //    }
-        //    if (pageNumber != 0)
-        //    {
-        //        options.PageNumber = pageNumber;
-        //        options.CountPagesToRender = 1;
-        //    }
-        //    options.CellsOptions.ShowGridLines = true;
-        //}
+            if (watermark != null)
+            {
+                options.Watermark = watermark;
+            }
+        }
+
+        private LoadOptions GetLoadOptions(string guid, string password)
+        {
+            var loadOptions = new LoadOptions(GetSaveFormat(guid)) 
+            { 
+                Password = password
+            };
+
+            return loadOptions;
+        }
+
+        private FileType GetSaveFormat(string saveFilePath)
+        {
+            string extension = Path.GetExtension(saveFilePath).Replace(".", "");
+            extension = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(extension);
+            dynamic format = null;
+            switch (extension)
+            {
+                case "Doc":
+                    format = FileType.DOC;
+                    break;
+                case "Rtf":
+                    format = FileType.RTF;
+                    break;
+                case "Xls":
+                    format = FileType.XLS;
+                    break;
+                case "Xlsx":
+                    format = FileType.XLSX;
+                    break;
+                case "Pdf":
+                    format = FileType.PDF;
+                    break;
+                default:
+                    format = FileType.DOCX;
+                    break;
+
+            }
+            return format;
+        }
     }
 }
