@@ -102,44 +102,38 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             // TODO: get temp directory name
             string tempDirectoryName = "temp";
 
-            try
-            {
-                allFiles.Sort(new FileNameComparator());
-                allFiles.Sort(new FileDateComparator());
+            allFiles.Sort(new FileNameComparator());
+            allFiles.Sort(new FileDateComparator());
 
-                foreach (string file in allFiles)
-                {
-                    FileInfo fileInfo = new FileInfo(file);
-                    // check if current file/folder is hidden
-                    if (tempDirectoryName.Equals(Path.GetFileName(file)) ||
-                        fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-                        Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory())))
-                    {
-                        // ignore current file and skip to next one
-                        continue;
-                    }
-                    else
-                    {
-                        FileDescriptionEntity fileDescription = new FileDescriptionEntity();
-                        fileDescription.guid = Path.GetFullPath(file);
-                        fileDescription.name = Path.GetFileName(file);
-                        // set is directory true/false
-                        fileDescription.isDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory);
-                        // set file size
-                        if (!fileDescription.isDirectory)
-                        {
-                            fileDescription.size = fileInfo.Length;
-                        }
-                        // add object to array list
-                        fileList.Add(fileDescription);
-                    }
-                }
-                return fileList;
-            }
-            catch (Exception ex)
+            foreach (string file in allFiles)
             {
-                throw ex;
+                FileInfo fileInfo = new FileInfo(file);
+                // check if current file/folder is hidden
+                if (tempDirectoryName.Equals(Path.GetFileName(file)) ||
+                    fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+                    Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory())))
+                {
+                    // ignore current file and skip to next one
+                    continue;
+                }
+                else
+                {
+                    FileDescriptionEntity fileDescription = new FileDescriptionEntity();
+                    fileDescription.guid = Path.GetFullPath(file);
+                    fileDescription.name = Path.GetFileName(file);
+                    // set is directory true/false
+                    fileDescription.isDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory);
+                    // set file size
+                    if (!fileDescription.isDirectory)
+                    {
+                        fileDescription.size = fileInfo.Length;
+                    }
+                    // add object to array list
+                    fileList.Add(fileDescription);
+                }
             }
+
+            return fileList;
         }
 
         /// <summary>
@@ -353,7 +347,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             catch (Exception ex)
             {
                 // set exception message
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex));
             }
         }
 
@@ -378,7 +372,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             catch (Exception ex)
             {
                 // set exception message
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex, loadDocumentRequest.password));
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex, loadDocumentRequest.password));
             }
         }
 
@@ -403,7 +397,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             catch (Exception ex)
             {
                 // set exception message
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex));
             }
         }
 
@@ -457,6 +451,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 loadDocumentEntity.SetPages(pageData);
             }
             loadDocumentEntity.SetGuid(documentGuid);
+            loadDocumentEntity.SetShowGridLines(globalConfiguration.Viewer.GetShowGridLines());
             // return document description
             return loadDocumentEntity;
         }
@@ -548,6 +543,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 options.Watermark = watermark;
             }
+
+            options.SpreadsheetOptions.RenderGridLines = globalConfiguration.Viewer.GetShowGridLines();
         }
 
         private LoadOptions GetLoadOptions(string guid, string password)
@@ -587,6 +584,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     break;
 
             }
+
             return format;
         }
     }

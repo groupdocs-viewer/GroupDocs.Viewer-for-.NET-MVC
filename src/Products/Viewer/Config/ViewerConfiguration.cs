@@ -51,6 +51,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         [JsonProperty]
         private bool printAllowed = true;
 
+        [JsonProperty]
+        private bool showGridLines = true;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -82,6 +85,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
             saveRotateState = valuesGetter.GetBooleanPropertyValue("saveRotateState", saveRotateState);
             watermarkText = valuesGetter.GetStringPropertyValue("watermarkText", watermarkText);
             printAllowed = valuesGetter.GetBooleanPropertyValue("printAllowed", printAllowed);
+            showGridLines = valuesGetter.GetBooleanPropertyValue("showGridLines", showGridLines);
         }
 
         private static bool IsFullPath(string path)
@@ -220,6 +224,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         public bool GetPrintAllowed()
         {
             return printAllowed;
+        }
+
+        public void SetShowGridLines(bool showGridLines)
+        {
+            this.showGridLines = showGridLines;
+        }
+
+        public bool GetShowGridLines()
+        {
+            return showGridLines;
         }
     }
 }
