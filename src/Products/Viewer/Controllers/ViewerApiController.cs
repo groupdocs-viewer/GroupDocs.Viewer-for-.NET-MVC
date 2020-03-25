@@ -1,6 +1,5 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 using GroupDocs.Viewer.MVC.Products.Common.Resources;
-using GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,8 +14,7 @@ using GroupDocs.Viewer.Options;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
 using GroupDocs.Viewer.Results;
 using System.Text;
-using System.Globalization;
-using GroupDocs.Viewer;
+using GroupDocs.Viewer.Exceptions;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -40,7 +38,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             license.SetLicense(globalConfiguration.Application.LicensePath);
 
             List<string> fontsDirectory = new List<string>();
-            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
+            if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
             {
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
             }
@@ -66,13 +64,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("loadFileTree")]
         public HttpResponseMessage loadFileTree(PostedDataEntity postedData)
         {
-            string relDirPath = "";
-            // get posted data
-            if (postedData != null)
-            {
-                relDirPath = postedData.path;
-            }
-
             try
             {
                 List<FileDescriptionEntity> filesList = new List<FileDescriptionEntity>();
@@ -118,11 +109,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 }
                 else
                 {
-                    FileDescriptionEntity fileDescription = new FileDescriptionEntity();
-                    fileDescription.guid = Path.GetFullPath(file);
-                    fileDescription.name = Path.GetFileName(file);
-                    // set is directory true/false
-                    fileDescription.isDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory);
+                    FileDescriptionEntity fileDescription = new FileDescriptionEntity
+                    {
+                        guid = Path.GetFullPath(file),
+                        name = Path.GetFileName(file),
+                        // set is directory true/false
+                        isDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory)
+                    };
                     // set file size
                     if (!fileDescription.isDirectory)
                     {
@@ -145,18 +138,21 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("loadDocumentDescription")]
         public HttpResponseMessage LoadDocumentDescription(PostedDataEntity postedData)
         {
-            string password = "";
             try
             {
                 LoadDocumentEntity loadDocumentEntity = LoadDocument(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0);
                 // return document description
                 return Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);
             }
-            catch (System.Exception ex)
+            catch (PasswordRequiredException ex)
             {
                 // set exception message
-                // TODO: return InternalServerError for common Exception and Forbidden for PasswordProtectedException
-                return Request.CreateResponse(HttpStatusCode.Forbidden, new Resources().GenerateException(ex, password));
+                return Request.CreateResponse(HttpStatusCode.Forbidden, new Resources().GenerateException(ex, postedData.password));
+            }
+            catch (Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex, postedData.password));
             }
         }
 
@@ -175,20 +171,26 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // get/set parameters
                 string documentGuid = postedData.guid;
                 int pageNumber = postedData.page;
-                password = (String.IsNullOrEmpty(postedData.password)) ? null : postedData.password;
+                password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
                 // get document info options
                 ViewInfo viewInfo = null;
                 // set password for protected document                
-                var loadOptions = GetLoadOptions(documentGuid, password);
+                var loadOptions = GetLoadOptions(password);
 
                 using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
                 {
-                    viewInfo = viewer.GetViewInfo(
-                        ViewInfoOptions.ForJpgView(false));
+                    if (globalConfiguration.Viewer.GetIsHtmlMode())
+                    {
+                        viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+                    }
+                    else
+                    {
+                        viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForJpgView(false));
+                    }
                 }
 
                 PageDescriptionEntity page = GetPageDescriptionEntities(viewInfo.Pages[pageNumber - 1]);
-                page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], password, documentGuid));
+                page.SetData(RenderPageToString(viewInfo.Pages[pageNumber - 1].Number, password, documentGuid));
                 // return loaded page object
                 return Request.CreateResponse(HttpStatusCode.OK, page);
             }
@@ -340,8 +342,12 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                         client.DownloadFile(url, fileSavePath);
                     }
                 }
-                UploadedDocumentEntity uploadedDocument = new UploadedDocumentEntity();
-                uploadedDocument.guid = fileSavePath;
+
+                UploadedDocumentEntity uploadedDocument = new UploadedDocumentEntity
+                {
+                    guid = fileSavePath
+                };
+
                 return Request.CreateResponse(HttpStatusCode.OK, uploadedDocument);
             }
             catch (Exception ex)
@@ -405,7 +411,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             // get/set parameters
             string documentGuid = postedData.guid;
-            string password = (String.IsNullOrEmpty(postedData.password)) ? null : postedData.password;
+            string password = (string.IsNullOrEmpty(postedData.password)) ? null : postedData.password;
             LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
             
             // check if documentGuid contains path or only file name
@@ -418,19 +424,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             dynamic viewInfoJpg = null;
 
             // set password for protected document                
-            var loadOptions = GetLoadOptions(documentGuid, password);
+            var loadOptions = GetLoadOptions(password);
 
             using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
             {
                 viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
             }
 
+            // TODO: we need this currently to get pages sizes
             using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
             {
-                // TODO: check that this is needed
-                //HtmlViewOptions viewOptions =
-                //    HtmlViewOptions.ForEmbeddedResources();
-
                 viewInfoJpg = viewer.GetViewInfo(ViewInfoOptions.ForJpgView(false));
             }
 
@@ -450,8 +453,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 }
                 loadDocumentEntity.SetPages(pageData);
             }
+
             loadDocumentEntity.SetGuid(documentGuid);
             loadDocumentEntity.SetShowGridLines(globalConfiguration.Viewer.GetShowGridLines());
+            
             // return document description
             return loadDocumentEntity;
         }
@@ -469,12 +474,24 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
         private string RenderPageToString(int pageNumberToRender, string documentGuid, string password)
         {
+            byte[] bytes;
+
             // TODO: consider adding usage of the RedisCache
             using (MemoryStream pageStream = RenderPageToMemoryStream(pageNumberToRender, password, documentGuid))
             {
-                string html = Encoding.UTF8.GetString(pageStream.ToArray());
+                if (globalConfiguration.Viewer.GetIsHtmlMode())
+                {
+                    string html = Encoding.UTF8.GetString(pageStream.ToArray());
 
-                return html;
+                    return html;
+                }
+                else 
+                {
+                    bytes = pageStream.ToArray();
+                    string encodedImage = Convert.ToBase64String(bytes);
+
+                    return encodedImage;
+                }
             }
         }
 
@@ -482,56 +499,58 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             MemoryStream result = new MemoryStream();
 
-            var loadOptions = GetLoadOptions(documentGuid, password);
+            var loadOptions = GetLoadOptions(password);
 
             using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, loadOptions))
             {
-                HtmlViewOptions viewOptions =
-                    HtmlViewOptions.ForEmbeddedResources(
+                if (globalConfiguration.Viewer.GetIsHtmlMode())
+                {
+                    HtmlViewOptions viewOptions =
+                        HtmlViewOptions.ForEmbeddedResources(
+                            pageNumber => result,
+                            (pageNumber, pageStream) =>
+                            {
+                                // Do not close stream as we're about to read from it
+                            });
+
+                    SetWatermarkOptions(viewOptions);
+
+                    viewer.View(viewOptions, pageNumberToRender);
+                }
+                else
+                {
+                    PngViewOptions PngViewOptions = new PngViewOptions(
                         pageNumber => result,
                         (pageNumber, pageStream) =>
                         {
                             // Do not close stream as we're about to read from it
                         });
 
-                SetWatermarkOptions(viewOptions);
+                    SetWatermarkOptions(PngViewOptions);
 
-                viewer.View(viewOptions, pageNumberToRender);
+                    viewer.View(PngViewOptions, pageNumberToRender);
+                }
             }
 
             return result;
         }
 
-        private string GetPageContent(Page page, string password, string documentGuid)
-        {
-            if (globalConfiguration.Viewer.GetIsHtmlMode())
-            {
-                // get page HTML
-                return RenderPageToString(page.Number, password, documentGuid);
-            }
-
-            return page.Lines.ToString();
-        }
-
         private List<string> GetAllPagesContent(string password, string documentGuid, IList<Page> pages)
         {
             List<string> allPages = new List<string>();
-            if (globalConfiguration.Viewer.GetIsHtmlMode())
-            {
-                //get page HTML
-                for (int i = 0; i < pages.Count; i++)
-                {               
-                    allPages.Add(RenderPageToString(pages[i].Number, password, documentGuid));
-                }
+
+            for (int i = 0; i < pages.Count; i++)
+            {               
+                allPages.Add(RenderPageToString(pages[i].Number, password, documentGuid));
             }
 
             return allPages;
         }
 
-        private void SetWatermarkOptions(HtmlViewOptions options)
+        private void SetWatermarkOptions(ViewOptions options)
         {
             Watermark watermark = null;
-            if (!String.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
+            if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
             {
                 // Set watermark properties
                 watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
@@ -543,49 +562,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 options.Watermark = watermark;
             }
-
-            options.SpreadsheetOptions.RenderGridLines = globalConfiguration.Viewer.GetShowGridLines();
         }
 
-        private LoadOptions GetLoadOptions(string guid, string password)
+        private LoadOptions GetLoadOptions(string password)
         {
-            var loadOptions = new LoadOptions(GetSaveFormat(guid)) 
+            var loadOptions = new LoadOptions() 
             { 
                 Password = password
             };
 
             return loadOptions;
-        }
-
-        private FileType GetSaveFormat(string saveFilePath)
-        {
-            string extension = Path.GetExtension(saveFilePath).Replace(".", "");
-            extension = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(extension);
-            dynamic format = null;
-            switch (extension)
-            {
-                case "Doc":
-                    format = FileType.DOC;
-                    break;
-                case "Rtf":
-                    format = FileType.RTF;
-                    break;
-                case "Xls":
-                    format = FileType.XLS;
-                    break;
-                case "Xlsx":
-                    format = FileType.XLSX;
-                    break;
-                case "Pdf":
-                    format = FileType.PDF;
-                    break;
-                default:
-                    format = FileType.DOCX;
-                    break;
-
-            }
-
-            return format;
         }
     }
 }
