@@ -15,6 +15,9 @@ using System.Text;
 using GroupDocs.Viewer.Exceptions;
 using GroupDocs.Viewer.Caching;
 using GroupDocs.Viewer.Interfaces;
+using System.Xml.Linq;
+using System.Linq;
+using System.Globalization;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -179,9 +182,17 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, settings))
                 {
                     HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
-                    Rotation angle = GetAngleValue(postedData.angle);
+                    var currentAngle = GetCurrentAngle(pageNumber, Path.Combine(cacheFolder, "PagesInfo.xml"));
+                    int newAngle = GetNewAngleValue(currentAngle, postedData.angle);
 
-                    viewOptions.RotatePage(1, angle);
+                    if (newAngle != 0)
+                    {
+                        Rotation rotationAngle = GetRotationByAngle(newAngle);
+                        viewOptions.RotatePage(pageNumber, rotationAngle);
+                    }
+
+                    SaveChangeAngle(settings, pageNumber, newAngle);
+
                     viewer.View(viewOptions);
                 }
 
@@ -195,9 +206,46 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private Rotation GetAngleValue(int angle)
+        private void SaveChangeAngle(ViewerSettings settings, int pageNumber, int newAngle)
         {
-            switch (angle) 
+            var cacheFolder = ((FileCache)settings.Cache).CachePath;
+            var pagesInfoPath = Path.Combine(cacheFolder, "PagesInfo.xml");
+
+            if (File.Exists(pagesInfoPath)) 
+            {
+                XDocument xdoc = XDocument.Load(pagesInfoPath);
+                var pageData = xdoc.Descendants()?.Elements("Number")?.Where(x => int.Parse(x.Value) == pageNumber)?.Ancestors("PageData");
+                var angle = pageData.Elements("Angle").FirstOrDefault();
+
+                if (angle != null)
+                {
+                    angle.Value = newAngle.ToString(CultureInfo.InvariantCulture);
+                }
+
+                xdoc.Save(pagesInfoPath);
+            }
+        }
+
+        private int GetNewAngleValue(int currentAngle, int postedAngle)
+        {
+            switch (currentAngle) 
+            {
+                case 0:
+                    return postedAngle == 90 ? 90 : 270;
+                case 90:
+                    return postedAngle == 90 ? 180 : 0;
+                case 180:
+                    return postedAngle == 90 ? 270 : 90;
+                case 270:
+                    return postedAngle == 90 ? 0 : 180;
+                default:
+                    return 0;
+            }
+        }
+
+        private Rotation GetRotationByAngle(int newAngle)
+        {
+            switch (newAngle)
             {
                 case 90:
                     return Rotation.On90Degree;
@@ -205,12 +253,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     return Rotation.On180Degree;
                 case 270:
                     return Rotation.On270Degree;
-                case -90:
-                    return Rotation.On270Degree;
-                case -180:
-                    return Rotation.On180Degree;
-                case -270:
-                    return Rotation.On90Degree;
                 default:
                     return Rotation.On90Degree;
             }
@@ -230,6 +272,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 HtmlViewOptions options = HtmlViewOptions.ForEmbeddedResources(pageFilePathFormat);
                 viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+
                 viewer.View(options);
             }
 
@@ -252,6 +295,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             dynamic viewInfoJpg;
             LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
+            var cacheFolder = ((FileCache)settings.Cache).CachePath;
+            var pagesInfoPath = Path.Combine(cacheFolder, "PagesInfo.xml");
 
             // Create the list to store output pages
             List<MemoryStream> pages = new List<MemoryStream>();
@@ -270,6 +315,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid))
             {
                 viewInfoJpg = viewer.GetViewInfo(ViewInfoOptions.ForJpgView(false));
+                
+                if (!File.Exists(pagesInfoPath))
+                {
+                    CreatePagesInfoFile(pagesInfoPath, viewInfoJpg);
+                }
             }
 
             List<string> pagesContent = new List<string>();
@@ -281,7 +331,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             foreach (Page page in viewInfoJpg.Pages)
             {
-                PageDescriptionEntity pageData = GetPageDescriptionEntities(page);
+                PageDescriptionEntity pageData = GetPageDescriptionEntities(page, pagesInfoPath);
                 if (pagesContent.Count > 0)
                 {
                     pageData.SetData(pagesContent[page.Number - 1]);
@@ -292,6 +342,21 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             loadDocumentEntity.SetGuid(documentGuid);
 
             return loadDocumentEntity;
+        }
+
+        private void CreatePagesInfoFile(string pagesInfoPath, ViewInfo viewInfoJpg)
+        {
+            var xdoc = new XDocument(new XElement("Pages"));
+
+            foreach (var page in viewInfoJpg.Pages)
+            {
+                xdoc.Element("Pages")
+                    .Add(new XElement("PageData",
+                        new XElement("Number", page.Number),
+                        new XElement("Angle", 0)));
+            }
+
+            xdoc.Save(pagesInfoPath);
         }
 
         internal class MemoryPageStreamFactory : IPageStreamFactory
@@ -318,15 +383,31 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private PageDescriptionEntity GetPageDescriptionEntities(Page page)
+        private PageDescriptionEntity GetPageDescriptionEntities(Page page, string pagesInfoPath)
         {
+            int currentAngle = GetCurrentAngle(page.Number, pagesInfoPath);
+
             PageDescriptionEntity pageDescriptionEntity = new PageDescriptionEntity();
             pageDescriptionEntity.number = page.Number;
-            // TODO: because page.Angle does not exist
+            // TODO: we intentionally use the 0 here because we plan to rotate only the page background using height/width
             pageDescriptionEntity.angle = 0;
-            pageDescriptionEntity.height = page.Height;
-            pageDescriptionEntity.width = page.Width;
+            pageDescriptionEntity.height = currentAngle == 0 || currentAngle == 180 ? page.Height : page.Width;
+            pageDescriptionEntity.width = currentAngle == 0 || currentAngle == 180 ? page.Width : page.Height;
             return pageDescriptionEntity;
+        }
+
+        private int GetCurrentAngle(int pageNumber, string pagesInfoPath)
+        {
+            XDocument xdoc = XDocument.Load(pagesInfoPath);
+            var pageData = xdoc.Descendants()?.Elements("Number")?.Where(x => int.Parse(x.Value) == pageNumber)?.Ancestors("PageData");
+            var angle = pageData.Elements("Angle").FirstOrDefault();
+
+            if (angle != null)
+            {
+                return int.Parse(angle.Value);
+            }
+
+            return 0;
         }
     }
 }
