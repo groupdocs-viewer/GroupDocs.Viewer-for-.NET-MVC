@@ -18,6 +18,9 @@ using GroupDocs.Viewer.Interfaces;
 using System.Xml.Linq;
 using System.Linq;
 using System.Globalization;
+using System.Web;
+using System.Net.Http.Headers;
+using System.Threading;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -93,8 +96,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             allFiles.AddRange(Directory.GetDirectories(currentPath));
             List<FileDescriptionEntity> fileList = new List<FileDescriptionEntity>();
 
-            // TODO: get temp directory name
-            string tempDirectoryName = "temp";
+            string cacheFolderName = globalConfiguration.Viewer.GetCacheFolderName();
 
             allFiles.Sort(new FileNameComparator());
             allFiles.Sort(new FileDateComparator());
@@ -103,7 +105,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 FileInfo fileInfo = new FileInfo(file);
                 // check if current file/folder is hidden
-                if (tempDirectoryName.Equals(Path.GetFileName(file)) ||
+                if (cacheFolderName.Equals(Path.GetFileName(file)) ||
                     fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
                     Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory())))
                 {
@@ -160,6 +162,51 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
+        /// Get document page
+        /// </summary>
+        /// <param name="postedData">Post data</param>
+        /// <returns>Document page object</returns>
+        [HttpPost]
+        [Route("loadDocumentPage")]
+        public HttpResponseMessage LoadDocumentPage(PostedDataEntity postedData)
+        {
+            string password = "";
+            try
+            {
+                string documentGuid = postedData.guid;
+                int pageNumber = postedData.page;
+                password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
+                ViewInfo viewInfo = null;
+
+                // set password for protected document
+                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password)))
+                {
+                    viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+                }
+
+                string pageFilePathFormat;
+                ViewerSettings settings = GetViewerSettings(documentGuid, out pageFilePathFormat);
+                var cacheFolder = ((FileCache)settings.Cache).CachePath;
+
+                EventWaitHandle waitHandle = new EventWaitHandle(true, EventResetMode.AutoReset, "SHARED_BY_ALL_PROCESSES");
+                waitHandle.WaitOne();
+                GenerateViewerCache(documentGuid, password, pageFilePathFormat, settings, pageNumber);
+                waitHandle.Set();
+
+                var pagesInfoPath = Path.Combine(cacheFolder, "PagesInfo.xml");
+                PageDescriptionEntity page = GetPageDescriptionEntities(viewInfo.Pages[pageNumber - 1], pagesInfoPath);
+                page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], password, documentGuid, settings));
+
+                return Request.CreateResponse(HttpStatusCode.OK, page);
+            }
+            catch (Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.Forbidden, new Resources().GenerateException(ex, password));
+            }
+        }
+
+        /// <summary>
         /// Rotated specific page(s) of the document
         /// </summary>
         /// <param name="postedData">Document page number to rotate and rotation angle</param>
@@ -177,11 +224,24 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 ViewerSettings settings = GetViewerSettings(documentGuid, out pageFilePathFormat);
 
                 var cacheFolder = ((FileCache)settings.Cache).CachePath;
-                File.Delete(Path.Combine(cacheFolder, "p" + pageNumber + "_html.dat"));
+                File.Delete(Path.Combine(cacheFolder, $"p{pageNumber}_html.dat"));
+                File.Delete(Path.Combine(cacheFolder, $"p{pageNumber}_png.dat"));
 
-                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, settings))
+                var page = new PageDescriptionEntity();
+
+                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(postedData.password), settings))
                 {
-                    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+                    ViewOptions viewOptions;
+
+                    if (globalConfiguration.Viewer.GetIsHtmlMode())
+                    {
+                        viewOptions = HtmlViewOptions.ForEmbeddedResources();
+                    }
+                    else
+                    {
+                        viewOptions = new PngViewOptions();
+                    }
+
                     var currentAngle = GetCurrentAngle(pageNumber, Path.Combine(cacheFolder, "PagesInfo.xml"));
                     int newAngle = GetNewAngleValue(currentAngle, postedData.angle);
 
@@ -191,22 +251,174 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                         viewOptions.RotatePage(pageNumber, rotationAngle);
                     }
 
-                    SaveChangeAngle(settings, pageNumber, newAngle);
+                    SaveChangedAngleInCache(settings, pageNumber, newAngle);
 
                     viewer.View(viewOptions);
+
+                    var viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+                    page = GetPageDescriptionEntities(viewInfo.Pages[pageNumber - 1], Path.Combine(cacheFolder, "PagesInfo.xml"));
+                    page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], postedData.password, documentGuid, settings));
                 }
 
-                // TODO: remove response object
-                return Request.CreateResponse(HttpStatusCode.OK, new object());
+                return Request.CreateResponse(HttpStatusCode.OK, page);
             }
             catch (Exception ex)
             {
                 // set exception message
-                return Request.CreateResponse(HttpStatusCode.OK, new Resources().GenerateException(ex));
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex));
             }
         }
 
-        private void SaveChangeAngle(ViewerSettings settings, int pageNumber, int newAngle)
+        /// <summary>
+        /// Download curerntly viewed document
+        /// </summary>
+        /// <param name="path">Path of the document to download</param>
+        /// <returns>Document stream as attachement</returns>
+        [HttpGet]
+        [Route("downloadDocument")]
+        public HttpResponseMessage DownloadDocument(string path)
+        {
+            if (!string.IsNullOrEmpty(path))
+            {
+                if (File.Exists(path))
+                {
+                    HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+                    var fileStream = new FileStream(path, FileMode.Open);
+                    response.Content = new StreamContent(fileStream);
+                    response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                    response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                    response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(path);
+                    return response;
+                }
+            }
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
+        /// <summary>
+        /// Upload document
+        /// </summary>
+        /// <param name="postedData">Post data</param>
+        /// <returns>Uploaded document object</returns>
+        [HttpPost]
+        [Route("uploadDocument")]
+        public HttpResponseMessage UploadDocument()
+        {
+            try
+            {
+                string url = HttpContext.Current.Request.Form["url"];
+                // get documents storage path
+                string documentStoragePath = globalConfiguration.Viewer.GetFilesDirectory();
+                bool rewrite = bool.Parse(HttpContext.Current.Request.Form["rewrite"]);
+                string fileSavePath = "";
+                if (string.IsNullOrEmpty(url))
+                {
+                    if (HttpContext.Current.Request.Files.AllKeys != null)
+                    {
+                        // Get the uploaded document from the Files collection
+                        var httpPostedFile = HttpContext.Current.Request.Files["file"];
+                        if (httpPostedFile != null)
+                        {
+                            if (rewrite)
+                            {
+                                // Get the complete file path
+                                fileSavePath = Path.Combine(documentStoragePath, httpPostedFile.FileName);
+                            }
+                            else
+                            {
+                                fileSavePath = Resources.GetFreeFileName(documentStoragePath, httpPostedFile.FileName);
+                            }
+
+                            // Save the uploaded file to "UploadedFiles" folder
+                            httpPostedFile.SaveAs(fileSavePath);
+                        }
+                    }
+                }
+                else
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        // get file name from the URL
+                        Uri uri = new Uri(url);
+                        string fileName = Path.GetFileName(uri.LocalPath);
+                        if (rewrite)
+                        {
+                            // Get the complete file path
+                            fileSavePath = Path.Combine(documentStoragePath, fileName);
+                        }
+                        else
+                        {
+                            fileSavePath = Resources.GetFreeFileName(documentStoragePath, fileName);
+                        }
+                        // Download the Web resource and save it into the current filesystem folder.
+                        client.DownloadFile(url, fileSavePath);
+                    }
+                }
+
+                UploadedDocumentEntity uploadedDocument = new UploadedDocumentEntity
+                {
+                    guid = fileSavePath
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK, uploadedDocument);
+            }
+            catch (Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex));
+            }
+        }
+
+        [HttpPost]
+        [Route("loadThumbnails")]
+        public LoadDocumentEntity loadThumbnails(PostedDataEntity loadDocumentRequest)
+        {
+            return LoadDocument(loadDocumentRequest, true);
+        }
+
+        [HttpPost]
+        [Route("loadPrint")]
+        public HttpResponseMessage loadPrint(PostedDataEntity loadDocumentRequest)
+        {
+            try
+            {
+                LoadDocumentEntity loadPrintDocument = LoadDocument(loadDocumentRequest, true);
+                // return document description
+                return Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
+
+            }
+            catch (Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex, loadDocumentRequest.password));
+            }
+        }
+
+        [HttpPost]
+        [Route("printPdf")]
+        public HttpResponseMessage PrintPdf(PostedDataEntity loadDocumentRequest)
+        {
+            // get document path
+            string documentGuid = loadDocumentRequest.guid;
+            string fileName = Path.GetFileName(documentGuid);
+            try
+            {
+                var fileStream = new FileStream(documentGuid, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+                response.Content = new StreamContent(fileStream);
+                // add file into the response
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(fileName);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                // set exception message
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Resources().GenerateException(ex));
+            }
+        }
+
+        private void SaveChangedAngleInCache(ViewerSettings settings, int pageNumber, int newAngle)
         {
             var cacheFolder = ((FileCache)settings.Cache).CachePath;
             var pagesInfoPath = Path.Combine(cacheFolder, "PagesInfo.xml");
@@ -262,21 +474,52 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             // get/set parameters
             string documentGuid = postedData.guid;
-
-            dynamic viewInfo;
+            string password = (string.IsNullOrEmpty(postedData.password)) ? null : postedData.password;
 
             string pageFilePathFormat;
             ViewerSettings settings = GetViewerSettings(documentGuid, out pageFilePathFormat);
 
-            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, settings))
+            if (loadAllPages)
             {
-                HtmlViewOptions options = HtmlViewOptions.ForEmbeddedResources(pageFilePathFormat);
-                viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
-
-                viewer.View(options);
+                GenerateViewerCache(documentGuid, password, pageFilePathFormat, settings);
             }
 
-            return GetLoadDocumentEntity(documentGuid, settings);
+            return GetLoadDocumentEntity(documentGuid, password, settings, loadAllPages);
+        }
+
+        private void GenerateViewerCache(string documentGuid, string password, string pageFilePathFormat, ViewerSettings settings, int pageNumber = -1)
+        {
+            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password), settings))
+            {
+                if (globalConfiguration.Viewer.GetIsHtmlMode())
+                {
+                    HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForEmbeddedResources(pageFilePathFormat);                  
+                    SetWatermarkOptions(htmlViewOptions);
+
+                    if (pageNumber < 0)
+                    {
+                        viewer.View(htmlViewOptions);
+                    }
+                    else
+                    {
+                        viewer.View(htmlViewOptions, pageNumber);
+                    }
+                }
+                else
+                {
+                    PngViewOptions pngViewOptions = new PngViewOptions();
+                    SetWatermarkOptions(pngViewOptions);
+
+                    if (pageNumber < 0)
+                    {
+                        viewer.View(pngViewOptions);
+                    }
+                    else
+                    {
+                        viewer.View(pngViewOptions, pageNumber);
+                    }
+                }
+            }
         }
 
         private ViewerSettings GetViewerSettings(string documentGuid, out string pageFilePathFormat)
@@ -291,45 +534,64 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return settings;
         }
 
-        private LoadDocumentEntity GetLoadDocumentEntity(string documentGuid, ViewerSettings settings)
+        private LoadDocumentEntity GetLoadDocumentEntity(string documentGuid, string password, ViewerSettings settings, bool loadAllPages)
         {
-            dynamic viewInfoJpg;
+            dynamic viewInfo;
             LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
-            var cacheFolder = ((FileCache)settings.Cache).CachePath;
-            var pagesInfoPath = Path.Combine(cacheFolder, "PagesInfo.xml");
-
-            // Create the list to store output pages
-            List<MemoryStream> pages = new List<MemoryStream>();
-
-            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, settings))
+            var fileCacheFolder = ((FileCache)settings.Cache).CachePath;
+            if (!Directory.Exists(fileCacheFolder))
             {
-                MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
-
-                ViewOptions viewOptions =
-                    HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
-
-                viewer.View(viewOptions);
+                Directory.CreateDirectory(fileCacheFolder);
             }
+            var pagesInfoPath = Path.Combine(fileCacheFolder, "PagesInfo.xml");
 
-            // TODO: we need this currently to get pages sizes remove on 20.3
-            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid))
+            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password)))
             {
-                viewInfoJpg = viewer.GetViewInfo(ViewInfoOptions.ForJpgView(false));
-                
+                viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+
                 if (!File.Exists(pagesInfoPath))
                 {
-                    CreatePagesInfoFile(pagesInfoPath, viewInfoJpg);
+                    CreatePagesInfoFile(pagesInfoPath, viewInfo);
                 }
             }
 
             List<string> pagesContent = new List<string>();
-
-            foreach (var pageStream in pages)
+            if (loadAllPages)
             {
-                pagesContent.Add(Encoding.UTF8.GetString(pageStream.ToArray()));
+                List<MemoryStream> pages = new List<MemoryStream>();
+
+                using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password), settings))
+                {
+                    MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+
+                    if (globalConfiguration.Viewer.GetIsHtmlMode())
+                    {
+                        ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+
+                        viewer.View(viewOptions);
+                    }
+                    else
+                    {
+                        PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
+
+                        viewer.View(pngViewOptions);
+                    }
+                }
+
+                foreach (var pageStream in pages)
+                {
+                    if (globalConfiguration.Viewer.GetIsHtmlMode())
+                    {
+                        pagesContent.Add(Encoding.UTF8.GetString(pageStream.ToArray()));
+                    }
+                    else
+                    {
+                        pagesContent.Add(Convert.ToBase64String(pageStream.ToArray()));
+                    }
+                }
             }
 
-            foreach (Page page in viewInfoJpg.Pages)
+            foreach (Page page in viewInfo.Pages)
             {
                 PageDescriptionEntity pageData = GetPageDescriptionEntities(page, pagesInfoPath);
                 if (pagesContent.Count > 0)
@@ -342,21 +604,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             loadDocumentEntity.SetGuid(documentGuid);
 
             return loadDocumentEntity;
-        }
-
-        private void CreatePagesInfoFile(string pagesInfoPath, ViewInfo viewInfoJpg)
-        {
-            var xdoc = new XDocument(new XElement("Pages"));
-
-            foreach (var page in viewInfoJpg.Pages)
-            {
-                xdoc.Element("Pages")
-                    .Add(new XElement("PageData",
-                        new XElement("Number", page.Number),
-                        new XElement("Angle", 0)));
-            }
-
-            xdoc.Save(pagesInfoPath);
         }
 
         internal class MemoryPageStreamFactory : IPageStreamFactory
@@ -389,11 +636,52 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             PageDescriptionEntity pageDescriptionEntity = new PageDescriptionEntity();
             pageDescriptionEntity.number = page.Number;
-            // TODO: we intentionally use the 0 here because we plan to rotate only the page background using height/width
+            // we intentionally use the 0 here because we plan to rotate only the page background using height/width
             pageDescriptionEntity.angle = 0;
             pageDescriptionEntity.height = currentAngle == 0 || currentAngle == 180 ? page.Height : page.Width;
             pageDescriptionEntity.width = currentAngle == 0 || currentAngle == 180 ? page.Width : page.Height;
             return pageDescriptionEntity;
+        }
+
+        private string GetPageContent(Page page, string password, string documentGuid, ViewerSettings settings)
+        {
+            List<MemoryStream> pages = new List<MemoryStream>();
+
+            using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password), settings))
+            {
+                MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+                if (globalConfiguration.Viewer.GetIsHtmlMode())
+                {
+                    ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+
+                    viewer.View(viewOptions, page.Number);
+
+                    return Encoding.UTF8.GetString(pages[0].ToArray());
+                }
+                else
+                {
+                    PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
+
+                    viewer.View(pngViewOptions, page.Number);
+
+                    return Convert.ToBase64String(pages[0].ToArray());
+                }
+            }
+        }
+
+        private void CreatePagesInfoFile(string pagesInfoPath, ViewInfo viewInfo)
+        {
+            var xdoc = new XDocument(new XElement("Pages"));
+
+            foreach (var page in viewInfo.Pages)
+            {
+                xdoc.Element("Pages")
+                    .Add(new XElement("PageData",
+                        new XElement("Number", page.Number),
+                        new XElement("Angle", 0)));
+            }
+
+            xdoc.Save(pagesInfoPath);
         }
 
         private int GetCurrentAngle(int pageNumber, string pagesInfoPath)
@@ -408,6 +696,33 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
 
             return 0;
+        }
+
+        private void SetWatermarkOptions(ViewOptions options)
+        {
+            Watermark watermark = null;
+            if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
+            {
+                // Set watermark properties
+                watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
+                watermark.Color = System.Drawing.Color.Blue;
+                watermark.Position = Position.Diagonal;
+            }
+
+            if (watermark != null)
+            {
+                options.Watermark = watermark;
+            }
+        }
+
+        private Options.LoadOptions GetLoadOptions(string password)
+        {
+            Options.LoadOptions loadOptions = new Options.LoadOptions()
+            {
+                Password = password
+            };
+
+            return loadOptions;
         }
     }
 }

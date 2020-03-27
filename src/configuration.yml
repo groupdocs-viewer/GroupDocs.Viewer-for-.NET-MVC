@@ -51,6 +51,9 @@ viewer:
   # Files directory path
   # Absolute path to files directory
   filesDirectory: 'DocumentSamples/Viewer'
+  # Cache folder name
+  # Relative path to cache directory
+  cacheFolderName: 'cache'
   # Fonts path
   # Absolute path to custom fonts directory
   fontsDirectory: ''

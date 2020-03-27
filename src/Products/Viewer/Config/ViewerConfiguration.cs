@@ -54,6 +54,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         [JsonProperty]
         private bool showGridLines = true;
 
+        [JsonProperty]
+        private string cacheFolderName = "cache";
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -71,6 +74,15 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
                 if (!Directory.Exists(filesDirectory))
                 {
                     Directory.CreateDirectory(filesDirectory);
+                }
+            }
+            cacheFolderName = valuesGetter.GetStringPropertyValue("cacheFolderName", cacheFolderName);
+            if (!IsFullPath(cacheFolderName))
+            {
+                var cacheDirectory = Path.Combine(filesDirectory, cacheFolderName);
+                if (!Directory.Exists(cacheDirectory))
+                {
+                    Directory.CreateDirectory(cacheDirectory);
                 }
             }
             fontsDirectory = valuesGetter.GetStringPropertyValue("fontsDirectory", fontsDirectory);
@@ -104,6 +116,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         public string GetFilesDirectory()
         {
             return filesDirectory;
+        }
+
+        public void SetCacheFolderName(string cacheFolderName)
+        {
+            this.cacheFolderName = cacheFolderName;
+        }
+
+        public string GetCacheFolderName()
+        {
+            return cacheFolderName;
         }
 
         public void SetFontsDirectory(string fontsDirectory)
