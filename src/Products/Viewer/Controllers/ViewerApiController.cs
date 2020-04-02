@@ -401,7 +401,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 XDocument xdoc = XDocument.Load(pagesInfoPath);
                 var pageData = xdoc.Descendants()?.Elements("Number")?.Where(x => int.Parse(x.Value) == pageNumber)?.Ancestors("PageData");
-                var angle = pageData.Elements("Angle").FirstOrDefault();
+                var angle = pageData?.Elements("Angle").FirstOrDefault();
 
                 if (angle != null)
                 {
@@ -464,7 +464,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private void GenerateViewerCache(GroupDocs.Viewer.Viewer viewer, int pageNumber = -1, int newAngle = 0)
+        private static void GenerateViewerCache(GroupDocs.Viewer.Viewer viewer, int pageNumber = -1, int newAngle = 0)
         {
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
@@ -519,7 +519,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return new ViewerSettings(threadSafeCache);
         }
 
-        private LoadDocumentEntity GetLoadDocumentEntity(GroupDocs.Viewer.Viewer viewer, string documentGuid, string cachePath, bool loadAllPages)
+        private static LoadDocumentEntity GetLoadDocumentEntity(GroupDocs.Viewer.Viewer viewer, string documentGuid, string cachePath, bool loadAllPages)
         {
             dynamic viewInfo;
             LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
@@ -624,7 +624,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return pageDescriptionEntity;
         }
 
-        private string GetPageContent(Page page, string password, string documentGuid, ViewerSettings settings)
+        private static string GetPageContent(Page page, string password, string documentGuid, ViewerSettings settings)
         {
             List<MemoryStream> pages = new List<MemoryStream>();
 
