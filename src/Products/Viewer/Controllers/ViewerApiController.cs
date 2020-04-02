@@ -76,7 +76,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 List<FileDescriptionEntity> filesList = new List<FileDescriptionEntity>();
                 if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetFilesDirectory()))
                 {
-                    filesList = this.LoadFiles();
+                    filesList = LoadFiles();
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, filesList);
             }
@@ -90,7 +90,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// Load documents
         /// </summary>
         /// <returns>List[FileDescriptionEntity]</returns>
-        public List<FileDescriptionEntity> LoadFiles()
+        public static List<FileDescriptionEntity> LoadFiles()
         {
             var currentPath = globalConfiguration.Viewer.GetFilesDirectory();
             List<string> allFiles = new List<string>(Directory.GetFiles(currentPath));
@@ -106,14 +106,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 FileInfo fileInfo = new FileInfo(file);
                 // check if current file/folder is hidden
-                if (cacheFolderName.Equals(Path.GetFileName(file)) ||
+                if (!(cacheFolderName.Equals(Path.GetFileName(file)) ||
                     fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-                    Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory())))
-                {
-                    // ignore current file and skip to next one
-                    continue;
-                }
-                else
+                    Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory()))))
                 {
                     FileDescriptionEntity fileDescription = new FileDescriptionEntity
                     {
@@ -398,7 +393,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private void SaveChangedAngleInCache(string cachePath, int pageNumber, int newAngle)
+        private static void SaveChangedAngleInCache(string cachePath, int pageNumber, int newAngle)
         {
             var pagesInfoPath = Path.Combine(cachePath, "PagesInfo.xml");
 
@@ -417,7 +412,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private int GetNewAngleValue(int currentAngle, int postedAngle)
+        private static int GetNewAngleValue(int currentAngle, int postedAngle)
         {
             switch (currentAngle)
             {
@@ -434,7 +429,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private Rotation GetRotationByAngle(int newAngle)
+        private static Rotation GetRotationByAngle(int newAngle)
         {
             switch (newAngle)
             {
@@ -511,7 +506,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private ViewerSettings GetViewerSettings(string documentGuid, out string cachePath)
+        private static ViewerSettings GetViewerSettings(string documentGuid, out string cachePath)
         {
             string outputDirectory = globalConfiguration.Viewer.GetFilesDirectory();
             cachePath = Path.Combine(outputDirectory, "cache");
@@ -616,7 +611,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private PageDescriptionEntity GetPageDescriptionEntities(Page page, string pagesInfoPath)
+        private static PageDescriptionEntity GetPageDescriptionEntities(Page page, string pagesInfoPath)
         {
             int currentAngle = GetCurrentAngle(page.Number, pagesInfoPath);
 
@@ -656,7 +651,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private void CreatePagesInfoFile(string pagesInfoPath, ViewInfo viewInfo)
+        private static void CreatePagesInfoFile(string pagesInfoPath, ViewInfo viewInfo)
         {
             var xdoc = new XDocument(new XElement("Pages"));
 
@@ -671,11 +666,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             xdoc.Save(pagesInfoPath);
         }
 
-        private int GetCurrentAngle(int pageNumber, string pagesInfoPath)
+        private static int GetCurrentAngle(int pageNumber, string pagesInfoPath)
         {
             XDocument xdoc = XDocument.Load(pagesInfoPath);
             var pageData = xdoc.Descendants()?.Elements("Number")?.Where(x => int.Parse(x.Value) == pageNumber)?.Ancestors("PageData");
-            var angle = pageData.Elements("Angle").FirstOrDefault();
+            var angle = pageData?.Elements("Angle").FirstOrDefault();
 
             if (angle != null)
             {
@@ -685,16 +680,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return 0;
         }
 
-        private void SetWatermarkOptions(ViewOptions options)
+        private static void SetWatermarkOptions(ViewOptions options)
         {
             Watermark watermark = null;
 
             if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetWatermarkText()))
             {
                 // Set watermark properties
-                watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText());
-                watermark.Color = System.Drawing.Color.Blue;
-                watermark.Position = Position.Diagonal;
+                watermark = new Watermark(globalConfiguration.Viewer.GetWatermarkText())
+                {
+                    Color = System.Drawing.Color.Blue,
+                    Position = Position.Diagonal
+                };
             }
 
             if (watermark != null)
@@ -703,9 +700,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private Options.LoadOptions GetLoadOptions(string password)
+        private static Options.LoadOptions GetLoadOptions(string password)
         {
-            Options.LoadOptions loadOptions = new Options.LoadOptions()
+            Options.LoadOptions loadOptions = new Options.LoadOptions
             {
                 Password = password
             };
