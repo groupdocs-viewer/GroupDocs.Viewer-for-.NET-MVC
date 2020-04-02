@@ -22,7 +22,6 @@ using System.Linq;
 using System.Globalization;
 using System.Web;
 using System.Net.Http.Headers;
-using System.Collections.Concurrent;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -54,7 +53,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
         /// <summary>
         /// Load Viewr configuration
-        /// </summary>       
+        /// </summary>
         /// <returns>Viewer configuration</returns>
         [HttpGet]
         [Route("loadConfig")]
@@ -189,8 +188,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 {
                     viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
 
-                    // we must generate pages markup files for future using
-                    GenerateViewerCache(documentGuid, viewer, pageNumber);
+                    // we must generate cache files for future using
+                    GenerateViewerCache(viewer, pageNumber);
                 }
 
                 var pagesInfoPath = Path.Combine(cachePath, "PagesInfo.xml");
@@ -223,36 +222,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 string cachePath;
                 ViewerSettings settings = GetViewerSettings(documentGuid, out cachePath);
 
-                File.Delete(Path.Combine(cachePath, CacheKeys.GetPageKey(pageNumber, ".html")));
-                File.Delete(Path.Combine(cachePath, CacheKeys.GetPageKey(pageNumber, ".png")));
+                File.Delete(Path.Combine(cachePath, $"p{pageNumber}_html.dat"));
+                File.Delete(Path.Combine(cachePath, $"p{pageNumber}_png.dat"));
 
                 PageDescriptionEntity page;
 
                 using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(postedData.password), settings))
                 {
-                    ViewOptions viewOptions;
-
-                    if (globalConfiguration.Viewer.GetIsHtmlMode())
-                    {
-                        viewOptions = HtmlViewOptions.ForEmbeddedResources();
-                    }
-                    else
-                    {
-                        viewOptions = new PngViewOptions();
-                    }
-
                     var currentAngle = GetCurrentAngle(pageNumber, Path.Combine(cachePath, "PagesInfo.xml"));
                     int newAngle = GetNewAngleValue(currentAngle, postedData.angle);
 
-                    if (newAngle != 0)
-                    {
-                        Rotation rotationAngle = GetRotationByAngle(newAngle);
-                        viewOptions.RotatePage(pageNumber, rotationAngle);
-                    }
-
                     SaveChangedAngleInCache(cachePath, pageNumber, newAngle);
-
-                    viewer.View(viewOptions, pageNumber);
+                    GenerateViewerCache(viewer, pageNumber, newAngle);
 
                     var viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
                     page = GetPageDescriptionEntities(viewInfo.Pages[pageNumber - 1], Path.Combine(cachePath, "PagesInfo.xml"));
@@ -480,22 +461,19 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password), settings))
             {
                 if (loadAllPages)
-                    GenerateViewerCache(documentGuid, viewer);
+                {
+                    GenerateViewerCache(viewer);
+                }
 
                 return GetLoadDocumentEntity(viewer, documentGuid, cachePath, loadAllPages);
             }
         }
 
-        private void GenerateViewerCache(string documentGuid, GroupDocs.Viewer.Viewer viewer, int pageNumber = -1)
+        private void GenerateViewerCache(GroupDocs.Viewer.Viewer viewer, int pageNumber = -1, int newAngle = 0)
         {
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                string outputDirectory = globalConfiguration.Viewer.GetFilesDirectory();
-                var cachePath = Path.Combine(outputDirectory, "cache");
-                cachePath = Path.Combine(cachePath, Path.GetFileNameWithoutExtension(documentGuid) + "_" + Path.GetExtension(documentGuid).Replace(".", string.Empty));
-                var pageFilePathFormat = Path.Combine(cachePath, "page_{0}.html");
-
-                HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForEmbeddedResources(pageFilePathFormat);
+                HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForEmbeddedResources(_ => new MemoryStream());
                 SetWatermarkOptions(htmlViewOptions);
 
                 if (pageNumber < 0)
@@ -504,12 +482,17 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 }
                 else
                 {
+                    if (newAngle != 0)
+                    {
+                        Rotation rotationAngle = GetRotationByAngle(newAngle);
+                        htmlViewOptions.RotatePage(pageNumber, rotationAngle);
+                    }
                     viewer.View(htmlViewOptions, pageNumber);
                 }
             }
             else
             {
-                PngViewOptions pngViewOptions = new PngViewOptions();
+                PngViewOptions pngViewOptions = new PngViewOptions(_ => new MemoryStream());
                 SetWatermarkOptions(pngViewOptions);
 
                 if (pageNumber < 0)
@@ -518,6 +501,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 }
                 else
                 {
+                    if (newAngle != 0)
+                    {
+                        Rotation rotationAngle = GetRotationByAngle(newAngle);
+                        pngViewOptions.RotatePage(pageNumber, rotationAngle);
+                    }
                     viewer.View(pngViewOptions, pageNumber);
                 }
             }
