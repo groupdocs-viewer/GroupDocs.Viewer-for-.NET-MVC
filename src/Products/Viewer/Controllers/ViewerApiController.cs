@@ -469,6 +469,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
                 HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForEmbeddedResources(_ => new MemoryStream());
+                htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
                 SetWatermarkOptions(htmlViewOptions);
 
                 if (pageNumber < 0)
@@ -488,6 +489,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             else
             {
                 PngViewOptions pngViewOptions = new PngViewOptions(_ => new MemoryStream());
+                pngViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
                 SetWatermarkOptions(pngViewOptions);
 
                 if (pageNumber < 0)
@@ -547,12 +549,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
                     ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+                    viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(viewOptions);
                 }
                 else
                 {
                     PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
+                    pngViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(pngViewOptions);
                 }
@@ -635,6 +639,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
                     ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+                    viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(viewOptions, page.Number);
 
@@ -643,6 +648,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 else
                 {
                     PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
+                    pngViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(pngViewOptions, page.Number);
 
