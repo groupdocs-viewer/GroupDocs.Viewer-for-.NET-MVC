@@ -489,7 +489,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             else
             {
                 PngViewOptions pngViewOptions = new PngViewOptions(_ => new MemoryStream());
-                pngViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
                 SetWatermarkOptions(pngViewOptions);
 
                 if (pageNumber < 0)
@@ -556,7 +555,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 else
                 {
                     PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
-                    pngViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(pngViewOptions);
                 }
@@ -648,7 +646,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 else
                 {
                     PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
-                    pngViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(pngViewOptions, page.Number);
 
