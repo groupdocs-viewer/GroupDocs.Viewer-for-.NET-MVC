@@ -107,8 +107,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 FileInfo fileInfo = new FileInfo(file);
                 // check if current file/folder is hidden
                 if (!(cacheFolderName.Equals(Path.GetFileName(file)) ||
-                    fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-                    Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory()))))
+                      Path.GetFileName(file).StartsWith(".") ||
+                      fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+                      Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory()))))
                 {
                     FileDescriptionEntity fileDescription = new FileDescriptionEntity
                     {
