@@ -31,6 +31,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
 
         [JsonProperty]
         public bool enableRightClick { get; set; }
+
         private NameValueCollection commonConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("commonConfiguration");
 
         /// <summary>

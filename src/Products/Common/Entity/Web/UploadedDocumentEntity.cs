@@ -2,7 +2,7 @@
 namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
     /// <summary>
-    /// Uploaded document entity
+    /// Uploaded document entity.
     /// </summary>
     public class UploadedDocumentEntity
     {

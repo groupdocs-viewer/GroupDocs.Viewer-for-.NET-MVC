@@ -3,7 +3,7 @@
 namespace GroupDocs.Viewer.MVC.Products.Common.Config
 {
     /// <summary>
-    /// Global configuration
+    /// Global configuration.
     /// </summary>
     public class GlobalConfiguration
     {
@@ -13,14 +13,14 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         public ViewerConfiguration Viewer;
 
         /// <summary>
-        /// Get all configurations
+        /// Get all configurations.
         /// </summary>
         public GlobalConfiguration()
-        {            
-            Server = new ServerConfiguration();
-            Application = new ApplicationConfiguration();
-            Viewer = new ViewerConfiguration();
-            Common = new CommonConfiguration();
+        {
+            this.Server = new ServerConfiguration();
+            this.Application = new ApplicationConfiguration();
+            this.Viewer = new ViewerConfiguration();
+            this.Common = new CommonConfiguration();
         }
     }
 }

@@ -1,15 +1,18 @@
-﻿
-namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
+﻿namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
     /// <summary>
-    /// File description entity
+    /// File description entity.
     /// </summary>
     public class FileDescriptionEntity
     {
         public string guid{ get; set; }
+
         public string name{ get; set; }
+
         public string docType{ get; set; }
+
         public bool isDirectory{ get; set; }
+
         public long size{ get; set; }
     }
 }

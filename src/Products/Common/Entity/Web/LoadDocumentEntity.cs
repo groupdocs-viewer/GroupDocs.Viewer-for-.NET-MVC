@@ -48,7 +48,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 
         public string GetGuid()
         {
-            return guid;
+            return this.guid;
         }
 
         public void SetPages(PageDescriptionEntity page)
@@ -58,7 +58,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 
         public List<PageDescriptionEntity> GetPages()
         {
-            return pages;
+            return this.pages;
         }
     }
 }
