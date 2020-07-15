@@ -1,34 +1,30 @@
-﻿// <copyright file="ViewerApiController.cs" company="GroupDocs">
-// Copyright (c) GroupDocs. All rights reserved.
-// </copyright>
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Web;
+using System.Web.Http;
+using System.Web.Http.Cors;
+using System.Xml.Linq;
+using GroupDocs.Viewer.Caching;
+using GroupDocs.Viewer.Exceptions;
+using GroupDocs.Viewer.Interfaces;
+using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
+using GroupDocs.Viewer.MVC.Products.Common.Resources;
+using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
+using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
+using GroupDocs.Viewer.MVC.Products.Viewer.Config;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text;
-    using System.Web;
-    using System.Web.Http;
-    using System.Web.Http.Cors;
-    using System.Xml.Linq;
-    using GroupDocs.Viewer.Caching;
-    using GroupDocs.Viewer.Exceptions;
-    using GroupDocs.Viewer.Interfaces;
-    using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
-    using GroupDocs.Viewer.MVC.Products.Common.Resources;
-    using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
-    using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
-    using GroupDocs.Viewer.MVC.Products.Viewer.Config;
-    using GroupDocs.Viewer.Options;
-    using GroupDocs.Viewer.Results;
-
     /// <summary>
     /// ViewerApiController.
     /// </summary>
@@ -38,7 +34,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <summary>
         /// Map for locking keys in viewer cache.
         /// </summary>
-        public static readonly ConcurrentDictionary<string, object> KeyLockerMap = new ConcurrentDictionary<string, object>();
+        protected static readonly ConcurrentDictionary<string, object> KeyLockerMap = new ConcurrentDictionary<string, object>();
 
         private static Common.Config.GlobalConfiguration globalConfiguration;
 
