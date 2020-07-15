@@ -52,7 +52,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Resources
         /// </summary>
         /// <param name="ex">Exception.</param>
         /// <returns>ExceptionEntity.</returns>
-        public ExceptionEntity GenerateException(System.Exception ex)
+        public static ExceptionEntity GenerateException(System.Exception ex)
         {
             // Initiate Exception entity
             ExceptionEntity exceptionEntity = new ExceptionEntity();
@@ -69,7 +69,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Resources
         /// <param name="ex">Exception.</param>
         /// <param name="password">string.</param>
         /// <returns>ExceptionEntity.</returns>
-        public ExceptionEntity GenerateException(System.Exception ex, string password)
+        public static ExceptionEntity GenerateException(System.Exception ex, string password)
         {
             // Initiate exception
             ExceptionEntity exceptionEntity = new ExceptionEntity();
