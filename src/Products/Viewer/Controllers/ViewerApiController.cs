@@ -54,55 +54,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Gets all sample files.
-        /// </summary>
-        /// <returns>List of sample files and sub-directories.</returns>
-        public static List<FileDescriptionEntity> GetSampleFiles()
-        {
-            var currentPath = globalConfiguration.Viewer.GetFilesDirectory();
-            List<string> allFiles = new List<string>(Directory.GetFiles(currentPath));
-            allFiles.AddRange(Directory.GetDirectories(currentPath));
-            List<FileDescriptionEntity> fileList = new List<FileDescriptionEntity>();
-
-            string cacheFolderName = globalConfiguration.Viewer.GetCacheFolderName();
-
-            allFiles.Sort(new FileNameComparator());
-            allFiles.Sort(new FileDateComparator());
-
-            foreach (string file in allFiles)
-            {
-                FileInfo fileInfo = new FileInfo(file);
-
-                // check if current file/folder is hidden
-                if (!(cacheFolderName.Equals(Path.GetFileName(file)) ||
-                      Path.GetFileName(file).StartsWith(".") ||
-                      fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-                      Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory()))))
-                {
-                    FileDescriptionEntity fileDescription = new FileDescriptionEntity
-                    {
-                        guid = Path.GetFullPath(file),
-                        name = Path.GetFileName(file),
-
-                        // set is directory true/false
-                        isDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory),
-                    };
-
-                    // set file size
-                    if (!fileDescription.isDirectory)
-                    {
-                        fileDescription.size = fileInfo.Length;
-                    }
-
-                    // add object to array list
-                    fileList.Add(fileDescription);
-                }
-            }
-
-            return fileList;
-        }
-
-        /// <summary>
         /// Loads Viewer configuration.
         /// </summary>
         /// <returns>Viewer configuration.</returns>
@@ -114,7 +65,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Gets all files and directories from storage.
+        /// Gets all files and directories from sample directory:
+        /// src/DocumentSamples/Viewer/.
         /// </summary>
         /// <returns>List of files and directories.</returns>
         [HttpPost]
@@ -124,9 +76,47 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             try
             {
                 List<FileDescriptionEntity> filesList = new List<FileDescriptionEntity>();
+
                 if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetFilesDirectory()))
                 {
-                    filesList = GetSampleFiles();
+                    var currentPath = globalConfiguration.Viewer.GetFilesDirectory();
+                    List<string> allFiles = new List<string>(Directory.GetFiles(currentPath));
+                    allFiles.AddRange(Directory.GetDirectories(currentPath));
+
+                    string cacheFolderName = globalConfiguration.Viewer.GetCacheFolderName();
+
+                    allFiles.Sort(new FileNameComparator());
+                    allFiles.Sort(new FileDateComparator());
+
+                    foreach (string file in allFiles)
+                    {
+                        FileInfo fileInfo = new FileInfo(file);
+
+                        // check if current file/folder is hidden
+                        if (!(cacheFolderName.Equals(Path.GetFileName(file)) ||
+                              Path.GetFileName(file).StartsWith(".") ||
+                              fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+                              Path.GetFileName(file).Equals(Path.GetFileName(globalConfiguration.Viewer.GetFilesDirectory()))))
+                        {
+                            FileDescriptionEntity fileDescription = new FileDescriptionEntity
+                            {
+                                guid = Path.GetFullPath(file),
+                                name = Path.GetFileName(file),
+
+                                // set is directory true/false
+                                isDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory),
+                            };
+
+                            // set file size
+                            if (!fileDescription.isDirectory)
+                            {
+                                fileDescription.size = fileInfo.Length;
+                            }
+
+                            // add object to array list
+                            filesList.Add(fileDescription);
+                        }
+                    }
                 }
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, filesList);
@@ -613,83 +603,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Gets document pages data, dimensions and rotation angles.
-        /// </summary>
-        /// <param name="viewer">Viewer object.</param>
-        /// <param name="documentGuid">Document guid.</param>
-        /// <param name="cachePath">Cache files path.</param>
-        /// <param name="loadAllPages">Flag to load all pages.</param>
-        /// <returns>Document pages data, dimensions and rotation angles.</returns>
-        private static LoadDocumentEntity GetDocumentPagesData(GroupDocs.Viewer.Viewer viewer, string documentGuid, string cachePath, bool loadAllPages)
-        {
-            dynamic viewInfo;
-            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
-
-            if (!Directory.Exists(cachePath))
-            {
-                Directory.CreateDirectory(cachePath);
-            }
-
-            var pagesInfoPath = Path.Combine(cachePath, "PagesInfo.xml");
-            viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
-
-            if (!File.Exists(pagesInfoPath))
-            {
-                CreatePagesInfoFile(pagesInfoPath, viewInfo);
-            }
-
-            List<string> pagesContent = new List<string>();
-
-            if (loadAllPages)
-            {
-                List<MemoryStream> pages = new List<MemoryStream>();
-                MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
-
-                if (globalConfiguration.Viewer.GetIsHtmlMode())
-                {
-                    ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
-                    viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
-
-                    viewer.View(viewOptions);
-                }
-                else
-                {
-                    PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
-
-                    viewer.View(pngViewOptions);
-                }
-
-                foreach (var pageStream in pages)
-                {
-                    if (globalConfiguration.Viewer.GetIsHtmlMode())
-                    {
-                        pagesContent.Add(Encoding.UTF8.GetString(pageStream.ToArray()));
-                    }
-                    else
-                    {
-                        pagesContent.Add(Convert.ToBase64String(pageStream.ToArray()));
-                    }
-                }
-            }
-
-            foreach (Page page in viewInfo.Pages)
-            {
-                PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
-
-                if (pagesContent.Count > 0)
-                {
-                    pageData.SetData(pagesContent[page.Number - 1]);
-                }
-
-                loadDocumentEntity.SetPages(pageData);
-            }
-
-            loadDocumentEntity.SetGuid(documentGuid);
-
-            return loadDocumentEntity;
-        }
-
-        /// <summary>
         /// Saves changed page rotation angle in cache.
         /// </summary>
         /// <param name="cachePath">Cache files path.</param>
@@ -779,7 +692,71 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     GenerateViewerCache(viewer);
                 }
 
-                return GetDocumentPagesData(viewer, documentGuid, cachePath, loadAllPages);
+                dynamic viewInfo;
+                LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
+
+                if (!Directory.Exists(cachePath))
+                {
+                    Directory.CreateDirectory(cachePath);
+                }
+
+                var pagesInfoPath = Path.Combine(cachePath, "PagesInfo.xml");
+                viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+
+                if (!File.Exists(pagesInfoPath))
+                {
+                    CreatePagesInfoFile(pagesInfoPath, viewInfo);
+                }
+
+                List<string> pagesContent = new List<string>();
+
+                if (loadAllPages)
+                {
+                    List<MemoryStream> pages = new List<MemoryStream>();
+                    MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+
+                    if (globalConfiguration.Viewer.GetIsHtmlMode())
+                    {
+                        ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+                        viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
+
+                        viewer.View(viewOptions);
+                    }
+                    else
+                    {
+                        PngViewOptions pngViewOptions = new PngViewOptions(pageStreamFactory);
+
+                        viewer.View(pngViewOptions);
+                    }
+
+                    foreach (var pageStream in pages)
+                    {
+                        if (globalConfiguration.Viewer.GetIsHtmlMode())
+                        {
+                            pagesContent.Add(Encoding.UTF8.GetString(pageStream.ToArray()));
+                        }
+                        else
+                        {
+                            pagesContent.Add(Convert.ToBase64String(pageStream.ToArray()));
+                        }
+                    }
+                }
+
+                foreach (Page page in viewInfo.Pages)
+                {
+                    PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
+
+                    if (pagesContent.Count > 0)
+                    {
+                        pageData.SetData(pagesContent[page.Number - 1]);
+                    }
+
+                    loadDocumentEntity.SetPages(pageData);
+                }
+
+                loadDocumentEntity.SetGuid(documentGuid);
+
+                return loadDocumentEntity;
             }
         }
 
