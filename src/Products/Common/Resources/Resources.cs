@@ -1,12 +1,10 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
-using System;
 using System.IO;
-using System.Web;
 
 namespace GroupDocs.Viewer.MVC.Products.Common.Resources
 {
     /// <summary>
-    /// Resources.
+    /// Provides methods for generating uploaded files names and exception entities.
     /// </summary>
     public class Resources
     {

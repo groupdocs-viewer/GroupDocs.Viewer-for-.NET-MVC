@@ -14,7 +14,6 @@ using System.Web.Http.Cors;
 using System.Xml.Linq;
 using GroupDocs.Viewer.Caching;
 using GroupDocs.Viewer.Exceptions;
-using GroupDocs.Viewer.Interfaces;
 using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 using GroupDocs.Viewer.MVC.Products.Common.Resources;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
@@ -134,7 +133,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <returns>Document pages data, dimensions and angles.</returns>
         [HttpPost]
         [Route("loadDocumentDescription")]
-        public HttpResponseMessage GetDocumentDescription(PostedDataEntity postedData)
+        public HttpResponseMessage GetDocumentData(PostedDataEntity postedData)
         {
             try
             {
@@ -468,27 +467,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Creates files with pages rotation angle info.
-        /// </summary>
-        /// <param name="pagesInfoPath">Path to file.</param>
-        /// <param name="viewInfo">Object with page numbers.</param>
-        private static void CreatePagesInfoFile(string pagesInfoPath, ViewInfo viewInfo)
-        {
-            var xdoc = new XDocument(new XElement("Pages"));
-
-            foreach (var page in viewInfo.Pages)
-            {
-                xdoc.Element("Pages")
-                    .Add(new XElement(
-                        "PageData",
-                        new XElement("Number", page.Number),
-                        new XElement("Angle", 0)));
-            }
-
-            xdoc.Save(pagesInfoPath);
-        }
-
-        /// <summary>
         /// Gets current rotation angle of the page.
         /// </summary>
         /// <param name="pageNumber">Page number.</param>
@@ -508,6 +486,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return 0;
         }
 
+        /// <summary>
+        /// Adds watermark on document if its specified in configuration file.
+        /// </summary>
+        /// <param name="options"></param>
         private static void SetWatermarkOptions(ViewOptions options)
         {
             Watermark watermark = null;
@@ -528,6 +510,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets document load options used in Viewer object constructor. 
+        /// </summary>
+        /// <param name="password">Document password.</param>
+        /// <returns>Load options object.</returns>
         private static Options.LoadOptions GetLoadOptions(string password)
         {
             Options.LoadOptions loadOptions = new Options.LoadOptions
@@ -539,7 +526,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Generates Viewer cache.
+        /// Generates cache of the document when it opened for the first time.
         /// </summary>
         /// <param name="viewer">Viewer object.</param>
         /// <param name="pageNumber">Page number.</param>
@@ -589,6 +576,12 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets viewer settings object needed for using cache files.
+        /// </summary>
+        /// <param name="documentGuid">Absolute path to document.</param>
+        /// <param name="cachePath">Absolute path to cache files folder.</param>
+        /// <returns>Viewer settings object.</returns>
         private static ViewerSettings GetViewerSettings(string documentGuid, out string cachePath)
         {
             string outputDirectory = globalConfiguration.Viewer.GetFilesDirectory();
@@ -705,7 +698,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
                 if (!File.Exists(pagesInfoPath))
                 {
-                    CreatePagesInfoFile(pagesInfoPath, viewInfo);
+                    var xdoc = new XDocument(new XElement("Pages"));
+
+                    foreach (var page in viewInfo.Pages)
+                    {
+                        xdoc.Element("Pages")
+                            .Add(new XElement(
+                                "PageData",
+                                new XElement("Number", page.Number),
+                                new XElement("Angle", 0)));
+                    }
+
+                    xdoc.Save(pagesInfoPath);
                 }
 
                 List<string> pagesContent = new List<string>();
@@ -757,47 +761,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 loadDocumentEntity.SetGuid(documentGuid);
 
                 return loadDocumentEntity;
-            }
-        }
-
-        /// <summary>
-        /// Produces pages streams.
-        /// </summary>
-        internal class MemoryPageStreamFactory : IPageStreamFactory
-        {
-            private readonly List<MemoryStream> pages;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="MemoryPageStreamFactory"/> class.
-            /// </summary>
-            /// <param name="pages">List of pages memory streams.</param>
-            public MemoryPageStreamFactory(List<MemoryStream> pages)
-            {
-                this.pages = pages;
-            }
-
-            /// <summary>
-            /// Creates page stream.
-            /// </summary>
-            /// <param name="pageNumber">Page number.</param>
-            /// <returns>Page stream.</returns>
-            public Stream CreatePageStream(int pageNumber)
-            {
-                MemoryStream pageStream = new MemoryStream();
-
-                this.pages.Add(pageStream);
-
-                return pageStream;
-            }
-
-            /// <summary>
-            /// Releases page stream.
-            /// </summary>
-            /// <param name="pageNumber">Page number.</param>
-            /// <param name="pageStream">Page stream.</param>
-            public void ReleasePageStream(int pageNumber, Stream pageStream)
-            {
-                // Do not release page stream as we'll need to keep the stream open
             }
         }
     }
