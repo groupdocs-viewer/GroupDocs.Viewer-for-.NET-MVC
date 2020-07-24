@@ -4,15 +4,15 @@ using System.IO;
 namespace GroupDocs.Viewer.MVC.Products.Common.Util.Comparator
 {
     /// <summary>
-    /// FileNameComparator
+    /// FileNameComparator.
     /// </summary>
     public class FileNameComparator : IComparer<string>
     {
         /// <summary>
-        /// Compare file names
+        /// Compare file names.
         /// </summary>
-        /// <param name="x">string</param>
-        /// <param name="y">string</param>
+        /// <param name="x">string.</param>
+        /// <param name="y">string.</param>
         /// <returns></returns>
         public int Compare(string x, string y)
         {

@@ -8,7 +8,7 @@ using System.Linq;
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 {
     /// <summary>
-    /// ViewerConfiguration
+    /// ViewerConfiguration.
     /// </summary>
     public class ViewerConfiguration : CommonConfiguration
     {
@@ -16,13 +16,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         private string filesDirectory = "DocumentSamples/Viewer";
 
         [JsonProperty]
-        private string fontsDirectory = "";
+        private string fontsDirectory = string.Empty;
 
         [JsonProperty]
-        private string defaultDocument = "";
+        private string defaultDocument = string.Empty;
 
         [JsonProperty]
-        private string watermarkText = "";
+        private string watermarkText = string.Empty;
 
         [JsonProperty]
         private int preloadPageCount;
@@ -58,7 +58,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
         private string cacheFolderName = "cache";
 
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="ViewerConfiguration"/> class.
         /// </summary>
         public ViewerConfiguration()
         {
@@ -67,42 +67,44 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
             ConfigurationValuesGetter valuesGetter = new ConfigurationValuesGetter(configuration);
 
             // get Viewer configuration section from the web.config
-            filesDirectory = valuesGetter.GetStringPropertyValue("filesDirectory", filesDirectory);
-            if (!IsFullPath(filesDirectory))
+            this.filesDirectory = valuesGetter.GetStringPropertyValue("filesDirectory", this.filesDirectory);
+            if (!IsFullPath(this.filesDirectory))
             {
-                filesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filesDirectory);
-                if (!Directory.Exists(filesDirectory))
+                this.filesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, this.filesDirectory);
+                if (!Directory.Exists(this.filesDirectory))
                 {
-                    Directory.CreateDirectory(filesDirectory);
+                    Directory.CreateDirectory(this.filesDirectory);
                 }
             }
-            cacheFolderName = valuesGetter.GetStringPropertyValue("cacheFolderName", cacheFolderName);
-            if (!IsFullPath(cacheFolderName))
+
+            this.cacheFolderName = valuesGetter.GetStringPropertyValue("cacheFolderName", this.cacheFolderName);
+            if (!IsFullPath(this.cacheFolderName))
             {
-                var cacheDirectory = Path.Combine(filesDirectory, cacheFolderName);
+                var cacheDirectory = Path.Combine(this.filesDirectory, this.cacheFolderName);
                 if (!Directory.Exists(cacheDirectory))
                 {
                     Directory.CreateDirectory(cacheDirectory);
                 }
             }
-            fontsDirectory = valuesGetter.GetStringPropertyValue("fontsDirectory", fontsDirectory);
-            defaultDocument = valuesGetter.GetStringPropertyValue("defaultDocument", defaultDocument);
-            preloadPageCount = valuesGetter.GetIntegerPropertyValue("preloadPageCount", preloadPageCount);
-            zoom = valuesGetter.GetBooleanPropertyValue("zoom", zoom);
-            search = valuesGetter.GetBooleanPropertyValue("search", search);
-            thumbnails = valuesGetter.GetBooleanPropertyValue("thumbnails", thumbnails);
-            rotate = valuesGetter.GetBooleanPropertyValue("rotate", rotate);
-            htmlMode = valuesGetter.GetBooleanPropertyValue("htmlMode", htmlMode);
-            cache = valuesGetter.GetBooleanPropertyValue("cache", cache);
-            saveRotateState = valuesGetter.GetBooleanPropertyValue("saveRotateState", saveRotateState);
-            watermarkText = valuesGetter.GetStringPropertyValue("watermarkText", watermarkText);
-            printAllowed = valuesGetter.GetBooleanPropertyValue("printAllowed", printAllowed);
-            showGridLines = valuesGetter.GetBooleanPropertyValue("showGridLines", showGridLines);
+
+            this.fontsDirectory = valuesGetter.GetStringPropertyValue("fontsDirectory", this.fontsDirectory);
+            this.defaultDocument = valuesGetter.GetStringPropertyValue("defaultDocument", this.defaultDocument);
+            this.preloadPageCount = valuesGetter.GetIntegerPropertyValue("preloadPageCount", this.preloadPageCount);
+            this.zoom = valuesGetter.GetBooleanPropertyValue("zoom", this.zoom);
+            this.search = valuesGetter.GetBooleanPropertyValue("search", this.search);
+            this.thumbnails = valuesGetter.GetBooleanPropertyValue("thumbnails", this.thumbnails);
+            this.rotate = valuesGetter.GetBooleanPropertyValue("rotate", this.rotate);
+            this.htmlMode = valuesGetter.GetBooleanPropertyValue("htmlMode", this.htmlMode);
+            this.cache = valuesGetter.GetBooleanPropertyValue("cache", this.cache);
+            this.saveRotateState = valuesGetter.GetBooleanPropertyValue("saveRotateState", this.saveRotateState);
+            this.watermarkText = valuesGetter.GetStringPropertyValue("watermarkText", this.watermarkText);
+            this.printAllowed = valuesGetter.GetBooleanPropertyValue("printAllowed", this.printAllowed);
+            this.showGridLines = valuesGetter.GetBooleanPropertyValue("showGridLines", this.showGridLines);
         }
 
         private static bool IsFullPath(string path)
         {
-            return !String.IsNullOrWhiteSpace(path)
+            return !string.IsNullOrWhiteSpace(path)
                 && path.IndexOfAny(System.IO.Path.GetInvalidPathChars().ToArray()) == -1
                 && Path.IsPathRooted(path)
                 && !Path.GetPathRoot(path).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal);
@@ -115,7 +117,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public string GetFilesDirectory()
         {
-            return filesDirectory;
+            return this.filesDirectory;
         }
 
         public void SetCacheFolderName(string cacheFolderName)
@@ -125,7 +127,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public string GetCacheFolderName()
         {
-            return cacheFolderName;
+            return this.cacheFolderName;
         }
 
         public void SetFontsDirectory(string fontsDirectory)
@@ -135,7 +137,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public string GetFontsDirectory()
         {
-            return fontsDirectory;
+            return this.fontsDirectory;
         }
 
         public void SetDefaultDocument(string defaultDocument)
@@ -145,7 +147,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public string GetDefaultDocument()
         {
-            return defaultDocument;
+            return this.defaultDocument;
         }
 
         public void SetPreloadPageCount(int preloadPageCount)
@@ -155,7 +157,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public int GetPreloadPageCount()
         {
-            return preloadPageCount;
+            return this.preloadPageCount;
         }
 
         public void SetIsZoom(bool isZoom)
@@ -165,7 +167,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetIsZoom()
         {
-            return zoom;
+            return this.zoom;
         }
 
         public void SetIsSearch(bool isSearch)
@@ -175,7 +177,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetIsSearch()
         {
-            return search;
+            return this.search;
         }
 
         public void SetIsThumbnails(bool isThumbnails)
@@ -185,7 +187,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetIsThumbnails()
         {
-            return thumbnails;
+            return this.thumbnails;
         }
 
         public void SetIsRotate(bool isRotate)
@@ -195,7 +197,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetIsRotate()
         {
-            return rotate;
+            return this.rotate;
         }
 
         public void SetIsHtmlMode(bool isHtmlMode)
@@ -205,7 +207,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetIsHtmlMode()
         {
-            return htmlMode;
+            return this.htmlMode;
         }
 
         public void SetCache(bool Cache)
@@ -215,7 +217,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetCache()
         {
-            return cache;
+            return this.cache;
         }
 
         public void SetSaveRotateState(bool saveRotateState)
@@ -225,7 +227,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetSaveRotateState()
         {
-            return saveRotateState;
+            return this.saveRotateState;
         }
 
         public void SetWatermarkText(string watermarkText)
@@ -235,7 +237,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public string GetWatermarkText()
         {
-            return watermarkText;
+            return this.watermarkText;
         }
 
         public void SetPrintAllowed(bool printAllowed)
@@ -245,7 +247,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetPrintAllowed()
         {
-            return printAllowed;
+            return this.printAllowed;
         }
 
         public void SetShowGridLines(bool showGridLines)
@@ -255,7 +257,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Config
 
         public bool GetShowGridLines()
         {
-            return showGridLines;
+            return this.showGridLines;
         }
     }
 }

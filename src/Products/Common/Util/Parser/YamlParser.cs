@@ -14,7 +14,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Util.Parser
         private dynamic ConfiguationData;
 
         public YamlParser()
-        {           
+        {
             if (File.Exists(YamlPath))
             {
                 using (var reader = new StringReader(File.ReadAllText(YamlPath)))
@@ -26,17 +26,18 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Util.Parser
                         .JsonCompatible()
                         .Build();
 
-                    ConfiguationData = serializer.Serialize(yamlObject);                     
+                    this.ConfiguationData = serializer.Serialize(yamlObject);
                 }
-            }             
+            }
         }
 
         public dynamic GetConfiguration(string configurationSectionName) {
             dynamic productConfiguration = null;
-            if (ConfiguationData != null)
+            if (this.ConfiguationData != null)
             {
-                productConfiguration = JsonConvert.DeserializeObject(ConfiguationData)[configurationSectionName];
-            } 
+                productConfiguration = JsonConvert.DeserializeObject(this.ConfiguationData)[configurationSectionName];
+            }
+
             return productConfiguration;
         }
     }

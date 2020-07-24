@@ -168,6 +168,7 @@
     <Compile Include="Products\Common\Util\Parser\YamlParser.cs" />
     <Compile Include="Products\Viewer\Cache\ConcurrentDictionaryKeyLockerStore.cs" />
     <Compile Include="Products\Viewer\Cache\IKeyLockerStore.cs" />
+    <Compile Include="Products\Viewer\Cache\MemoryPageStreamFactory.cs" />
     <Compile Include="Products\Viewer\Cache\ThreadSafeCache.cs" />
     <Compile Include="Products\Viewer\Config\ViewerConfiguration.cs" />
     <Compile Include="Products\Viewer\Controllers\ViewerApiController.cs" />
@@ -192,7 +193,6 @@
   <ItemGroup>
     <Content Include="Views\Viewer\Index.cshtml" />
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

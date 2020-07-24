@@ -10,31 +10,31 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         public ThreadSafeCache(ICache cache, IKeyLockerStore keyLockerStore)
         {
-            _cache = cache;
-            _keyLockerStore = keyLockerStore;
+            this._cache = cache;
+            this._keyLockerStore = keyLockerStore;
         }
 
         public void Set(string key, object value)
         {
-            lock (_keyLockerStore.GetLockerFor(key))
+            lock (this._keyLockerStore.GetLockerFor(key))
             {
-                _cache.Set(key, value);
+                this._cache.Set(key, value);
             }
         }
 
         public bool TryGetValue<TEntry>(string key, out TEntry value)
         {
-            lock (_keyLockerStore.GetLockerFor(key))
+            lock (this._keyLockerStore.GetLockerFor(key))
             {
-                return _cache.TryGetValue(key, out value);
+                return this._cache.TryGetValue(key, out value);
             }
         }
 
         public IEnumerable<string> GetKeys(string filter)
         {
-            lock (_keyLockerStore.GetLockerFor("get_keys"))
+            lock (this._keyLockerStore.GetLockerFor("get_keys"))
             {
-                return _cache.GetKeys(filter);
+                return this._cache.GetKeys(filter);
             }
         }
     }

@@ -3,21 +3,32 @@ using System.Collections.Generic;
 
 namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
+    /// <summary>
+    /// DTO-class, represents document properties and its pages collection.
+    /// </summary>
     public class LoadDocumentEntity
     {
-        ///Document Guid
+        /// <summary>
+        /// Document absolute path.
+        /// </summary>
         [JsonProperty]
         private string guid;
 
-        ///List of pages
+        /// <summary>
+        /// Collection of the document pages with their data.
+        /// </summary>
         [JsonProperty]
         private List<PageDescriptionEntity> pages = new List<PageDescriptionEntity>();
 
-        ///Print allowed
+        /// <summary>
+        /// Document print allowed flag.
+        /// </summary>
         [JsonProperty]
         private bool printAllowed = true;
 
-        ///Show grid lines
+        /// <summary>
+        /// Document show grid lines flag (for Excel files). 
+        /// </summary>
         [JsonProperty]
         private bool showGridLines = true;
 
@@ -48,7 +59,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 
         public string GetGuid()
         {
-            return guid;
+            return this.guid;
         }
 
         public void SetPages(PageDescriptionEntity page)
@@ -58,7 +69,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 
         public List<PageDescriptionEntity> GetPages()
         {
-            return pages;
+            return this.pages;
         }
     }
 }

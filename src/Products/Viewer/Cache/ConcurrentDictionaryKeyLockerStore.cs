@@ -9,19 +9,19 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         public ConcurrentDictionaryKeyLockerStore(ConcurrentDictionary<string, object> keyLockerMap, string uniqueKeyPrefix)
         {
-            _keyLockerMap = keyLockerMap;
-            _uniqueKeyPrefix = uniqueKeyPrefix;
+            this._keyLockerMap = keyLockerMap;
+            this._uniqueKeyPrefix = uniqueKeyPrefix;
         }
 
         public object GetLockerFor(string key)
         {
-            string uniqueKey = GetUniqueKey(key);
-            return _keyLockerMap.GetOrAdd(uniqueKey, k => new object());
+            string uniqueKey = this.GetUniqueKey(key);
+            return this._keyLockerMap.GetOrAdd(uniqueKey, k => new object());
         }
 
         private string GetUniqueKey(string key)
         {
-            return $"{_uniqueKeyPrefix}_{key}";
+            return $"{this._uniqueKeyPrefix}_{key}";
         }
     }
 }

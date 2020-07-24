@@ -6,7 +6,7 @@ using System.Configuration;
 namespace GroupDocs.Viewer.MVC.Products.Common.Config
 {
     /// <summary>
-    /// Server configuration
+    /// Server configuration.
     /// </summary>
     public class ServerConfiguration : ConfigurationSection
     {
@@ -15,15 +15,15 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         private readonly NameValueCollection serverConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("serverConfiguration");
 
         /// <summary>
-        /// Get server configuration section of the web.config
+        /// Get server configuration section of the web.config.
         /// </summary>
         public ServerConfiguration() {
             YamlParser parser = new YamlParser();
             dynamic configuration = parser.GetConfiguration("server");
             ConfigurationValuesGetter valuesGetter = new ConfigurationValuesGetter(configuration);
-            int defaultPort = Convert.ToInt32(serverConfiguration["httpPort"]);
-            HttpPort = valuesGetter.GetIntegerPropertyValue("connector", defaultPort, "port");
-            HostAddress = valuesGetter.GetStringPropertyValue("hostAddress", HostAddress);
+            int defaultPort = Convert.ToInt32(this.serverConfiguration["httpPort"]);
+            this.HttpPort = valuesGetter.GetIntegerPropertyValue("connector", defaultPort, "port");
+            this.HostAddress = valuesGetter.GetStringPropertyValue("hostAddress", this.HostAddress);
         }
     }
 }

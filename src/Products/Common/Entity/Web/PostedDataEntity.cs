@@ -3,17 +3,34 @@
 namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
 {
     /// <summary>
-    /// Posted data entity
+    /// DTO-class, representes document with its pages 
+    /// posted from the front-end.
     /// </summary>
     public class PostedDataEntity
     {
-        public string path { get; set; }
-        public string guid { get; set; }     
+        /// <summary>
+        /// Absolute path to the document.
+        /// </summary>
+        public string guid { get; set; }
+
+        /// <summary>
+        /// Document password.
+        /// </summary>
         public string password { get; set; }
-        public string url { get; set; }
+
+        /// <summary>
+        /// Page number.
+        /// </summary>
         public int page { get; set; }
+
+        /// <summary>
+        /// Page rotation angle.
+        /// </summary>
         public int angle { get; set; }
-        public List<int> pages { get; set; }        
-        public bool rewrite { get; set; }        
+
+        /// <summary>
+        /// Collection of the document pages with their data.
+        /// </summary>
+        public List<int> pages { get; set; }
     }
 }
