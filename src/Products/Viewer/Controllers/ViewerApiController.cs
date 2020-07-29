@@ -11,6 +11,7 @@ using System.Text;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Web.Http.Results;
 using System.Xml.Linq;
 using GroupDocs.Viewer.Caching;
 using GroupDocs.Viewer.Exceptions;
@@ -89,7 +90,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
                     foreach (string file in allFiles)
                     {
-                        FileInfo fileInfo = new FileInfo(file);
+                        System.IO.FileInfo fileInfo = new System.IO.FileInfo(file);
 
                         // check if current file/folder is hidden
                         if (!(cacheFolderName.Equals(Path.GetFileName(file)) ||
@@ -180,12 +181,12 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
 
                     // we must generate cache files for future using
-                    GenerateViewerCache(viewer, pageNumber);
+                    GenerateViewerCache(viewer, cachePath, pageNumber);
                 }
 
                 var pagesInfoPath = Path.Combine(cachePath, "PagesInfo.xml");
                 PageDescriptionEntity page = GetPageInfo(viewInfo.Pages[pageNumber - 1], pagesInfoPath);
-                page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], password, documentGuid, settings));
+                page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], password, documentGuid, settings, cachePath));
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, page);
             }
@@ -224,11 +225,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     int newAngle = GetNewAngleValue(currentAngle, postedData.angle);
 
                     SaveChangedAngleInCache(cachePath, pageNumber, newAngle);
-                    GenerateViewerCache(viewer, pageNumber, newAngle);
+                    GenerateViewerCache(viewer, cachePath, pageNumber, newAngle);
 
                     var viewInfo = viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
                     page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(cachePath, "PagesInfo.xml"));
-                    page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], postedData.password, documentGuid, settings));
+                    page.SetData(GetPageContent(viewInfo.Pages[pageNumber - 1], postedData.password, documentGuid, settings, cachePath));
                 }
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, page);
@@ -261,6 +262,34 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(path);
                     return response;
                 }
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
+        /// <summary>
+        /// Downloads requested resource file.
+        /// </summary>
+        /// <param name="guid">Name of the file containing resource.</param>
+        /// <param name="resourceName">Name of the resource file.</param>
+        /// <returns>Document stream as attachement.</returns>
+        [HttpGet]
+        [Route("resources/{guid}/{resourceName}")]
+        public HttpResponseMessage GetResource(string guid, string resourceName)
+        {
+            if (!string.IsNullOrEmpty(guid))
+            {
+                var path = Path.Combine(globalConfiguration.Viewer.GetFilesDirectory(), globalConfiguration.Viewer.GetCacheFolderName());
+                path = Path.Combine(path, guid);
+                path = Path.Combine(path, resourceName);
+
+                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+                var fileStream = new FileStream(path, FileMode.Open);
+                response.Content = new StreamContent(fileStream);
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(path);
+                return response;
             }
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);
@@ -377,37 +406,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Loads print pdf.
-        /// </summary>
-        /// <param name="loadDocumentRequest">PostedDataEntity.</param>
-        /// <returns>Data of all document pages.</returns>
-        [HttpPost]
-        [Route("printPdf")]
-        public HttpResponseMessage PrintPdf(PostedDataEntity loadDocumentRequest)
-        {
-            // get document path
-            string documentGuid = loadDocumentRequest.guid;
-            string fileName = Path.GetFileName(documentGuid);
-            try
-            {
-                var fileStream = new FileStream(documentGuid, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
-                response.Content = new StreamContent(fileStream);
-
-                // add file into the response
-                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-                response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(fileName);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                // set exception message
-                return this.Request.CreateResponse(HttpStatusCode.InternalServerError, Resources.GenerateException(ex));
-            }
-        }
-
-        /// <summary>
         /// Gets page dimensions and rotation angle.
         /// </summary>
         /// <param name="page">Page object.</param>
@@ -438,17 +436,20 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="documentGuid">Document guid.</param>
         /// <param name="settings">Viewer settings object.</param>
         /// <returns>Page content as a string.</returns>
-        private static string GetPageContent(Page page, string password, string documentGuid, ViewerSettings settings)
+        private static string GetPageContent(Page page, string password, string documentGuid, ViewerSettings settings, string cachePath)
         {
             List<MemoryStream> pages = new List<MemoryStream>();
 
             using (GroupDocs.Viewer.Viewer viewer = new GroupDocs.Viewer.Viewer(documentGuid, GetLoadOptions(password), settings))
             {
                 MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+                string cacheFilePath = Path.GetFileNameWithoutExtension(cachePath);
+                string resourcesPrefix = "/viewer/resources/" + cacheFilePath;
+                ExternalResourcesStreamFactory externalStreamFactory = new ExternalResourcesStreamFactory(cachePath, resourcesPrefix);
 
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+                    ViewOptions viewOptions = HtmlViewOptions.ForExternalResources(pageStreamFactory, externalStreamFactory);
                     viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                     viewer.View(viewOptions, page.Number);
@@ -531,11 +532,17 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="viewer">Viewer object.</param>
         /// <param name="pageNumber">Page number.</param>
         /// <param name="newAngle">New angle value.</param>
-        private static void GenerateViewerCache(GroupDocs.Viewer.Viewer viewer, int pageNumber = -1, int newAngle = 0)
+        private static void GenerateViewerCache(GroupDocs.Viewer.Viewer viewer, string cachePath, int pageNumber = -1, int newAngle = 0)
         {
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForEmbeddedResources(_ => new MemoryStream());
+                List<MemoryStream> pages = new List<MemoryStream>();
+                MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+                var cacheFilePath = Path.GetFileNameWithoutExtension(cachePath);
+                string resourcesPrefix = "/viewer/resources/" + cacheFilePath;
+                ExternalResourcesStreamFactory externalStreamFactory = new ExternalResourcesStreamFactory(cachePath, resourcesPrefix);
+
+                HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForExternalResources(pageStreamFactory, externalStreamFactory);
                 htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
                 SetWatermarkOptions(htmlViewOptions);
 
@@ -682,7 +689,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 if (loadAllPages)
                 {
-                    GenerateViewerCache(viewer);
+                    GenerateViewerCache(viewer, cachePath);
                 }
 
                 dynamic viewInfo;
@@ -718,10 +725,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 {
                     List<MemoryStream> pages = new List<MemoryStream>();
                     MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+                    string cacheFilePath = Path.GetFileNameWithoutExtension(cachePath);
+                    string resourcesPrefix = "/viewer/resources/" + cacheFilePath;
+                    ExternalResourcesStreamFactory externalStreamFactory = new ExternalResourcesStreamFactory(cachePath, resourcesPrefix);
 
                     if (globalConfiguration.Viewer.GetIsHtmlMode())
                     {
-                        ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+                        ViewOptions viewOptions = HtmlViewOptions.ForExternalResources(pageStreamFactory, externalStreamFactory);
                         viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
 
                         viewer.View(viewOptions);
