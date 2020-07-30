@@ -537,7 +537,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 List<MemoryStream> pages = new List<MemoryStream>();
                 MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
-                var cacheFilePath = Path.GetFileNameWithoutExtension(cachePath);
+                var cacheFilePath = Path.GetFileName(cachePath);
                 string resourcesPrefix = "/viewer/resources/" + cacheFilePath;
                 ExternalResourcesStreamFactory externalStreamFactory = new ExternalResourcesStreamFactory(cachePath, resourcesPrefix);
 
