@@ -15,7 +15,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         public ExternalResourcesStreamFactory(string cachePath, string resourcesPath)
         {
             if (!Directory.Exists(cachePath))
+            {
                 Directory.CreateDirectory(cachePath);
+            }
 
             _outputPath = cachePath;
             _urlPrefix = resourcesPath;

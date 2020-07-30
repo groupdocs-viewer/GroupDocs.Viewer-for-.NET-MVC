@@ -1,4 +1,13 @@
-﻿using System;
+﻿using GroupDocs.Viewer.Caching;
+using GroupDocs.Viewer.Exceptions;
+using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
+using GroupDocs.Viewer.MVC.Products.Common.Resources;
+using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
+using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
+using GroupDocs.Viewer.MVC.Products.Viewer.Config;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,17 +20,7 @@ using System.Text;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using System.Web.Http.Results;
 using System.Xml.Linq;
-using GroupDocs.Viewer.Caching;
-using GroupDocs.Viewer.Exceptions;
-using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
-using GroupDocs.Viewer.MVC.Products.Common.Resources;
-using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
-using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
-using GroupDocs.Viewer.MVC.Products.Viewer.Config;
-using GroupDocs.Viewer.Options;
-using GroupDocs.Viewer.Results;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -36,16 +35,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// </summary>
         protected static readonly ConcurrentDictionary<string, object> KeyLockerMap = new ConcurrentDictionary<string, object>();
 
-        private static Common.Config.GlobalConfiguration globalConfiguration;
+        private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ViewerApiController"/> class.
         /// </summary>
         public ViewerApiController()
         {
-            // Check if filesDirectory is relative or absolute path
-            globalConfiguration = new Common.Config.GlobalConfiguration();
-
             List<string> fontsDirectory = new List<string>();
             if (!string.IsNullOrEmpty(globalConfiguration.Viewer.GetFontsDirectory()))
             {
