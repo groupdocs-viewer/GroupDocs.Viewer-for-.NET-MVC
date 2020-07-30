@@ -286,9 +286,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
                 var fileStream = new FileStream(path, FileMode.Open);
                 response.Content = new StreamContent(fileStream);
-                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-                response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(path);
+                var fileName = Path.GetFileName(path);
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue(MimeMapping.GetMimeMapping(fileName));
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("inline");
+                response.Content.Headers.ContentDisposition.FileName = fileName;
                 return response;
             }
 
