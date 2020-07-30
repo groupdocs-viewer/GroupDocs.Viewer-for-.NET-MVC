@@ -448,6 +448,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 {
                     ViewOptions viewOptions = HtmlViewOptions.ForExternalResources(pageStreamFactory, externalStreamFactory);
                     viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
+                    viewOptions.SpreadsheetOptions.SkipEmptyColumns = true;
+                    viewOptions.SpreadsheetOptions.SkipEmptyRows = true;
 
                     viewer.View(viewOptions, page.Number);
 
@@ -541,6 +543,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
                 HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForExternalResources(pageStreamFactory, externalStreamFactory);
                 htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
+                htmlViewOptions.SpreadsheetOptions.SkipEmptyColumns = true;
+                htmlViewOptions.SpreadsheetOptions.SkipEmptyRows = true;
                 SetWatermarkOptions(htmlViewOptions);
 
                 if (pageNumber < 0)
@@ -730,6 +734,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                     {
                         ViewOptions viewOptions = HtmlViewOptions.ForExternalResources(pageStreamFactory, externalStreamFactory);
                         viewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
+                        viewOptions.SpreadsheetOptions.SkipEmptyColumns = true;
+                        viewOptions.SpreadsheetOptions.SkipEmptyRows = true;
 
                         viewer.View(viewOptions);
                     }
