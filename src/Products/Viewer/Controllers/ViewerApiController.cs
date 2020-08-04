@@ -676,7 +676,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
             if (!File.Exists(documentGuid)) 
             { 
-                throw new Exception("File not found."); 
+                throw new GroupDocsViewerException("File not found."); 
             }
 
             string cachePath;
