@@ -674,6 +674,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             // get/set parameters
             string documentGuid = postedData.guid;
             string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
+            if (!File.Exists(documentGuid)) 
+            { 
+                throw new GroupDocsViewerException("File not found."); 
+            }
 
             string cachePath;
             ViewerSettings settings = GetViewerSettings(documentGuid, out cachePath);
