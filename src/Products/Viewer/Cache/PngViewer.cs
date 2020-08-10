@@ -6,62 +6,46 @@ using System.IO;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 {
-    class HtmlViewer : IDisposable
+    class PngViewer : IDisposable
     {
         private readonly string filePath;
         private readonly string htmlResourcePrefix;
         private readonly IViewerCache cache;
 
         internal readonly GroupDocs.Viewer.Viewer viewer;
-        private readonly HtmlViewOptions viewOptions;
+        private readonly PngViewOptions pngViewOptions;
         private readonly ViewInfoOptions viewInfoOptions;
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
-        public HtmlViewer(string filePath, string htmlResourcePrefix, IViewerCache cache, int pageNumber = -1, int newAngle = 0)
+        public PngViewer(string filePath, string htmlResourcePrefix, IViewerCache cache, int pageNumber = -1, int newAngle = 0)
         {
             this.cache = cache;
             this.filePath = filePath;
             this.htmlResourcePrefix = htmlResourcePrefix;
             this.viewer = new GroupDocs.Viewer.Viewer(filePath);
-            this.viewOptions = this.CreateHtmlViewOptions(pageNumber, newAngle);
-            this.viewInfoOptions = ViewInfoOptions.FromHtmlViewOptions(this.viewOptions);
+            this.pngViewOptions = this.CreatePngViewOptions(pageNumber, newAngle);
+            this.viewInfoOptions = ViewInfoOptions.FromPngViewOptions(this.pngViewOptions);
         }
 
-        private HtmlViewOptions CreateHtmlViewOptions(int passedPageNumber = -1, int newAngle = 0)
+        private PngViewOptions CreatePngViewOptions(int passedPageNumber = -1, int newAngle = 0)
         {
-            HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForExternalResources(
-                pageNumber =>
+            PngViewOptions pngViewOptions = new PngViewOptions(pageNumber =>
             {
-                string fileName = $"p{pageNumber}.html";
+                string fileName = $"p{pageNumber}.png";
                 string filePath = this.cache.GetCacheFilePath(fileName);
 
                 return File.Create(filePath);
-            },
-                (pageNumber, resource) =>
-                {
-                    string fileName = $"p{pageNumber}_{resource.FileName}";
-                    string filePath = this.cache.GetCacheFilePath(fileName);
-
-                    return File.Create(filePath);
-                },
-                (pageNumber, resource) =>
-                {
-                    var urlPrefix = "/viewer/resources/" + Path.GetFileName(this.filePath).Replace(".", "_");
-                    return $"{urlPrefix}/p{ pageNumber}_{ resource.FileName}";
-                });
-
-            htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
-            htmlViewOptions.SpreadsheetOptions.SkipEmptyColumns = true;
-            htmlViewOptions.SpreadsheetOptions.SkipEmptyRows = true;
-            SetWatermarkOptions(htmlViewOptions);
+            });
 
             if (passedPageNumber >= 0 && newAngle != 0)
             {
                 Rotation rotationAngle = GetRotationByAngle(newAngle);
-                htmlViewOptions.RotatePage(passedPageNumber, rotationAngle);
+                pngViewOptions.RotatePage(passedPageNumber, rotationAngle);
             }
 
-            return htmlViewOptions;
+            SetWatermarkOptions(pngViewOptions);
+
+            return pngViewOptions;
         }
 
         /// <summary>
@@ -160,7 +144,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
                 if (missingPages.Length > 0)
                 {
-                    this.viewer.View(this.viewOptions, missingPages);
+                    this.viewer.View(this.pngViewOptions, missingPages);
                 }
             }
         }
@@ -170,7 +154,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             List<int> missingPages = new List<int>();
             foreach (Page page in pages)
             {
-                string pageKey = $"p{page.Number}.html";
+                string pageKey = $"p{page.Number}.png";
                 if (!this.cache.Contains(pageKey))
                 {
                     missingPages.Add(page.Number);
@@ -184,7 +168,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         {
             this.CreateCache();
 
-            string pageKey = $"p{pageNumber}.html";
+            string pageKey = $"p{pageNumber}.png";
             string filePath = this.cache.GetCacheFilePath(pageKey);
 
             return new System.IO.FileInfo(filePath);
