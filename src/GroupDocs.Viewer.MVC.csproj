@@ -172,6 +172,7 @@
     <Compile Include="Products\Viewer\Cache\CacheExtensions.cs" />
     <Compile Include="Products\Viewer\Cache\CrossProcessLock.cs" />
     <Compile Include="Products\Viewer\Cache\FileViewerCache.cs" />
+    <Compile Include="Products\Viewer\Cache\ICustomViewer.cs" />
     <Compile Include="Products\Viewer\Cache\PngViewer.cs" />
     <Compile Include="Products\Viewer\Cache\HtmlViewer.cs" />
     <Compile Include="Products\Viewer\Cache\IViewerCache.cs" />

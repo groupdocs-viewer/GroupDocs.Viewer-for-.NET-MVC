@@ -6,25 +6,30 @@ using System.IO;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 {
-    class PngViewer : IDisposable
+    class PngViewer : IDisposable, ICustomViewer
     {
         private readonly string filePath;
         private readonly string htmlResourcePrefix;
         private readonly IViewerCache cache;
 
-        internal readonly GroupDocs.Viewer.Viewer viewer;
+        private readonly GroupDocs.Viewer.Viewer viewer;
         private readonly PngViewOptions pngViewOptions;
         private readonly ViewInfoOptions viewInfoOptions;
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
-        public PngViewer(string filePath, string htmlResourcePrefix, IViewerCache cache, int pageNumber = -1, int newAngle = 0)
+        public PngViewer(string filePath, string htmlResourcePrefix, IViewerCache cache, LoadOptions loadOptions, int pageNumber = -1, int newAngle = 0)
         {
             this.cache = cache;
             this.filePath = filePath;
             this.htmlResourcePrefix = htmlResourcePrefix;
-            this.viewer = new GroupDocs.Viewer.Viewer(filePath);
+            this.viewer = new GroupDocs.Viewer.Viewer(filePath, loadOptions);
             this.pngViewOptions = this.CreatePngViewOptions(pageNumber, newAngle);
             this.viewInfoOptions = ViewInfoOptions.FromPngViewOptions(this.pngViewOptions);
+        }
+
+        public GroupDocs.Viewer.Viewer GetViewer()
+        {
+            return this.viewer;
         }
 
         private PngViewOptions CreatePngViewOptions(int passedPageNumber = -1, int newAngle = 0)
@@ -134,7 +139,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             return viewInfo;
         }
 
-        internal void CreateCache()
+        public void CreateCache()
         {
             ViewInfo viewInfo = this.GetViewInfo();
 

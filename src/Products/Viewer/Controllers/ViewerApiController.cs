@@ -170,34 +170,34 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
                 string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
 
-                // Delete page cache-files before regenerating with another angle
+                // Delete page cache-files before regenerating with another angle.
                 var cacheFiles = Directory.GetFiles(fileCacheSubFolder).Where(f => Path.GetFileName(f).StartsWith($"p{pageNumber}"));
                 cacheFiles.ForEach(f => File.Delete(f));
 
-                PageDescriptionEntity page;
-
+                // Getting new rotation angle value.
                 var currentAngle = GetCurrentAngle(pageNumber, Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
                 int newAngle = GetNewAngleValue(currentAngle, postedData.angle);
 
                 string htmlResourcePrefix = "/viewer/resources/";
                 IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
-                HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, pageNumber, newAngle);
-                PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, pageNumber, newAngle);
 
                 SaveChangedAngleInCache(fileCacheSubFolder, pageNumber, newAngle);
 
+                PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    htmlViewer.CreateCache();
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password), pageNumber, newAngle))
+                    {
+                        page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
+                    }
                 }
                 else
                 {
-                    htmlViewer.CreateCache();
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password), pageNumber, newAngle))
+                    {
+                        page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
+                    }
                 }
-
-                var viewInfo = htmlViewer.viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
-                page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
-                page.SetData(GetPageContent(pageNumber, postedData.password, documentGuid, cachePath, pageNumber, newAngle));
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, page);
             }
@@ -206,6 +206,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // set exception message
                 return this.Request.CreateResponse(HttpStatusCode.InternalServerError, Resources.GenerateException(ex));
             }
+        }
+
+        private PageDescriptionEntity GetPageDescritpionEntity(ICustomViewer customViewer, string documentGuid, int pageNumber, string fileCacheSubFolder)
+        {
+            PageDescriptionEntity page;
+            customViewer.CreateCache();
+
+            var viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
+            page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
+            page.SetData(GetPageContent(pageNumber, documentGuid, cachePath));
+
+            return page;
         }
 
         /// <summary>
@@ -411,32 +423,25 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <summary>
         /// Gets page content as a string.
         /// </summary>
-        /// <param name="page">Page object.</param>
-        /// <param name="password">Password.</param>
-        /// <param name="documentGuid">Document guid.</param>
-        /// <param name="settings">Viewer settings object.</param>
+        /// <param name="pageNumber">Page number.</param>
+        /// <param name="documentGuid">Document path.</param>
+        /// <param name="cachePath">Cache path.</param>
         /// <returns>Page content as a string.</returns>
-        private static string GetPageContent(int pageNumber, string password, string documentGuid, string cachePath, int passedPageNumber = -1, int newAngle = 0)
+        private static string GetPageContent(int pageNumber, string documentGuid, string cachePath)
         {
             var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
 
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                string filePath = $"{cachePath}/{fileFolderName}/p{pageNumber}.html";
-                return File.ReadAllText(filePath);
+                string htmlFilePath = $"{cachePath}/{fileFolderName}/p{pageNumber}.html";
+                return File.ReadAllText(htmlFilePath);
             }
             else
             {
-                //if (passedPageNumber >= 0 && newAngle != 0)
-                //{
-                //    Rotation rotationAngle = GetRotationByAngle(newAngle);
-                //    pngViewOptions.RotatePage(passedPageNumber, rotationAngle);
-                //}
-
-                string filePath = $"{cachePath}/{fileFolderName}/p{pageNumber}.png";
+                string pngFilePath = $"{cachePath}/{fileFolderName}/p{pageNumber}.png";
 
                 byte[] imageBytes = null;
-                using (Image image = Image.FromFile(filePath))
+                using (Image image = Image.FromFile(pngFilePath))
                 {
                     using (MemoryStream m = new MemoryStream())
                     {
@@ -533,26 +538,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
-        /// Gets enumeration member by rotation angle value.
-        /// </summary>
-        /// <param name="newAngle">New rotation angle value.</param>
-        /// <returns>Rotation enumeration member.</returns>
-        private static Rotation GetRotationByAngle(int newAngle)
-        {
-            switch (newAngle)
-            {
-                case 90:
-                    return Rotation.On90Degree;
-                case 180:
-                    return Rotation.On180Degree;
-                case 270:
-                    return Rotation.On270Degree;
-                default:
-                    return Rotation.On90Degree;
-            }
-        }
-
-        /// <summary>
         /// Gets document pages data, dimensions and rotation angles.
         /// </summary>
         /// <param name="postedData">Posted data with document guid.</param>
@@ -574,22 +559,34 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
 
             IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
-            HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache);
-            PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache);
 
-            if (loadAllPages)
+            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
+            if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                if (globalConfiguration.Viewer.GetIsHtmlMode())
+                using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
                 {
-                    htmlViewer.CreateCache();
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, password, fileCacheSubFolder, htmlViewer);
                 }
-                else
+            }
+            else
+            {
+                using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
                 {
-                    pngViewer.CreateCache();
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, password, fileCacheSubFolder, pngViewer);
                 }
             }
 
-            dynamic viewInfo = htmlViewer.viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+            return loadDocumentEntity;
+        }
+
+        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string password, string fileCacheSubFolder, ICustomViewer customViewer)
+        {
+            if (loadAllPages)
+            {
+                customViewer.CreateCache();
+            }
+
+            dynamic viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
             LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
 
             if (!Directory.Exists(cachePath))
@@ -605,14 +602,13 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
                 if (loadAllPages)
                 {
-                    pageData.SetData(GetPageContent(page.Number, password, documentGuid, cachePath));
+                    pageData.SetData(GetPageContent(page.Number, documentGuid, cachePath));
                 }
 
                 loadDocumentEntity.SetPages(pageData);
             }
 
             loadDocumentEntity.SetGuid(documentGuid);
-
             return loadDocumentEntity;
         }
 
@@ -637,22 +633,22 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 string htmlResourcePrefix = "/viewer/resources/";
 
                 IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
-                HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache);
-                PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache);
 
-                var viewInfo = htmlViewer.viewer.GetViewInfo(ViewInfoOptions.ForHtmlView());
+                PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    htmlViewer.CreateCache();
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                    {
+                        page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
+                    }
                 }
                 else
                 {
-                    pngViewer.CreateCache();
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                    {
+                        page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
+                    }
                 }
-
-                var pagesInfoPath = Path.Combine(fileCacheSubFolder, "PagesInfo.xml");
-                PageDescriptionEntity page = GetPageInfo(viewInfo.Pages[pageNumber - 1], pagesInfoPath);
-                page.SetData(GetPageContent(pageNumber, password, documentGuid, cachePath));
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, page);
             }
