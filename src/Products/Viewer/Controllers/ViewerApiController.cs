@@ -162,7 +162,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("loadDocumentPage")]
         public HttpResponseMessage GetDocumentPage(PostedDataEntity postedData)
         {
-            string password;
+            string password = string.Empty;
             try
             {
                 string documentGuid = postedData.guid;
@@ -178,14 +178,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
@@ -196,7 +196,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             catch (Exception ex)
             {
                 // set exception message
-                return this.Request.CreateResponse(HttpStatusCode.Forbidden, Resources.GenerateException(ex, postedData.password));
+                return this.Request.CreateResponse(HttpStatusCode.Forbidden, Resources.GenerateException(ex, password));
             }
         }
 
@@ -213,6 +213,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 var documentGuid = postedData.guid;
                 var pageNumber = postedData.pages[0];
+                string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
 
                 var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
                 string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
@@ -233,14 +234,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password), pageNumber, newAngle))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password), pageNumber, newAngle))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password), pageNumber, newAngle))
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password), pageNumber, newAngle))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
@@ -586,14 +587,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             LoadDocumentEntity loadDocumentEntity;
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
                 {
                     loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer);
                 }
             }
             else
             {
-                using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
                 {
                     loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer);
                 }

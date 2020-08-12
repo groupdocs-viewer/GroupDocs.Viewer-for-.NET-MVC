@@ -45,9 +45,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
                 (pageNumber, resource) =>
                 {
                     string fileName = $"p{pageNumber}_{resource.FileName}";
-                    string filePath = this.cache.GetCacheFilePath(fileName);
+                    string cacheFilePath = this.cache.GetCacheFilePath(fileName);
 
-                    return File.Create(filePath);
+                    return File.Create(cacheFilePath);
                 },
                 (pageNumber, resource) =>
                 {
