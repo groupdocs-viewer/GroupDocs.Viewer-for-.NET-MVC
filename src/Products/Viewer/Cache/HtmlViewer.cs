@@ -38,9 +38,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
                 pageNumber =>
             {
                 string fileName = $"p{pageNumber}.html";
-                string filePath = this.cache.GetCacheFilePath(fileName);
+                string cacheFilePath = this.cache.GetCacheFilePath(fileName);
 
-                return File.Create(filePath);
+                return File.Create(cacheFilePath);
             },
                 (pageNumber, resource) =>
                 {
@@ -98,10 +98,40 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             return viewInfo;
         }
 
+        public System.IO.FileInfo GetPageFile(int pageNumber)
+        {
+            this.CreateCache();
+
+            string pageKey = $"p{pageNumber}.html";
+            string cacheFilePath = this.cache.GetCacheFilePath(pageKey);
+
+            return new System.IO.FileInfo(cacheFilePath);
+        }
+
+        public void CreateCache()
+        {
+            ViewInfo viewInfo = this.GetViewInfo();
+
+            using (new CrossProcessLock(this.filePath))
+            {
+                int[] missingPages = this.GetPagesMissingFromCache(viewInfo.Pages);
+
+                if (missingPages.Length > 0)
+                {
+                    this.viewer.View(this.viewOptions, missingPages);
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            this.viewer?.Dispose();
+        }
+
         /// <summary>
         /// Adds watermark on document if its specified in configuration file.
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">View options.</param>
         private static void SetWatermarkOptions(ViewOptions options)
         {
             Watermark watermark = null;
@@ -155,21 +185,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             return viewInfo;
         }
 
-        public void CreateCache()
-        {
-            ViewInfo viewInfo = this.GetViewInfo();
-
-            using (new CrossProcessLock(this.filePath))
-            {
-                int[] missingPages = this.GetPagesMissingFromCache(viewInfo.Pages);
-
-                if (missingPages.Length > 0)
-                {
-                    this.viewer.View(this.viewOptions, missingPages);
-                }
-            }
-        }
-
         private int[] GetPagesMissingFromCache(IList<Page> pages)
         {
             List<int> missingPages = new List<int>();
@@ -183,21 +198,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             }
 
             return missingPages.ToArray();
-        }
-
-        public System.IO.FileInfo GetPageFile(int pageNumber)
-        {
-            this.CreateCache();
-
-            string pageKey = $"p{pageNumber}.html";
-            string filePath = this.cache.GetCacheFilePath(pageKey);
-
-            return new System.IO.FileInfo(filePath);
-        }
-
-        public void Dispose()
-        {
-            this.viewer?.Dispose();
         }
     }
 }

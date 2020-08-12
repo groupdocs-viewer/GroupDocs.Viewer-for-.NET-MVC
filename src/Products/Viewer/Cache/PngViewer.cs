@@ -34,23 +34,23 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         private PngViewOptions CreatePngViewOptions(int passedPageNumber = -1, int newAngle = 0)
         {
-            PngViewOptions pngViewOptions = new PngViewOptions(pageNumber =>
+            PngViewOptions createdPngViewOptions = new PngViewOptions(pageNumber =>
             {
                 string fileName = $"p{pageNumber}.png";
-                string filePath = this.cache.GetCacheFilePath(fileName);
+                string cacheFilePath = this.cache.GetCacheFilePath(fileName);
 
-                return File.Create(filePath);
+                return File.Create(cacheFilePath);
             });
 
             if (passedPageNumber >= 0 && newAngle != 0)
             {
                 Rotation rotationAngle = GetRotationByAngle(newAngle);
-                pngViewOptions.RotatePage(passedPageNumber, rotationAngle);
+                createdPngViewOptions.RotatePage(passedPageNumber, rotationAngle);
             }
 
-            SetWatermarkOptions(pngViewOptions);
+            SetWatermarkOptions(createdPngViewOptions);
 
-            return pngViewOptions;
+            return createdPngViewOptions;
         }
 
         /// <summary>
@@ -80,6 +80,36 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             Results.FileInfo viewInfo = this.cache.GetValue(cacheKey, () => this.ReadFileInfo());
 
             return viewInfo;
+        }
+
+        public System.IO.FileInfo GetPageFile(int pageNumber)
+        {
+            this.CreateCache();
+
+            string pageKey = $"p{pageNumber}.png";
+            string cacheFilePath = this.cache.GetCacheFilePath(pageKey);
+
+            return new System.IO.FileInfo(cacheFilePath);
+        }
+
+        public void CreateCache()
+        {
+            ViewInfo viewInfo = this.GetViewInfo();
+
+            using (new CrossProcessLock(this.filePath))
+            {
+                int[] missingPages = this.GetPagesMissingFromCache(viewInfo.Pages);
+
+                if (missingPages.Length > 0)
+                {
+                    this.viewer.View(this.pngViewOptions, missingPages);
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            this.viewer?.Dispose();
         }
 
         /// <summary>
@@ -139,21 +169,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             return viewInfo;
         }
 
-        public void CreateCache()
-        {
-            ViewInfo viewInfo = this.GetViewInfo();
-
-            using (new CrossProcessLock(this.filePath))
-            {
-                int[] missingPages = this.GetPagesMissingFromCache(viewInfo.Pages);
-
-                if (missingPages.Length > 0)
-                {
-                    this.viewer.View(this.pngViewOptions, missingPages);
-                }
-            }
-        }
-
         private int[] GetPagesMissingFromCache(IList<Page> pages)
         {
             List<int> missingPages = new List<int>();
@@ -167,21 +182,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             }
 
             return missingPages.ToArray();
-        }
-
-        public System.IO.FileInfo GetPageFile(int pageNumber)
-        {
-            this.CreateCache();
-
-            string pageKey = $"p{pageNumber}.png";
-            string filePath = this.cache.GetCacheFilePath(pageKey);
-
-            return new System.IO.FileInfo(filePath);
-        }
-
-        public void Dispose()
-        {
-            this.viewer?.Dispose();
         }
     }
 }

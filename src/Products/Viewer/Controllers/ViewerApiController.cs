@@ -154,6 +154,53 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         }
 
         /// <summary>
+        /// Gets document page info.
+        /// </summary>
+        /// <param name="postedData">Posted data with page number.</param>
+        /// <returns>Document page info.</returns>
+        [HttpPost]
+        [Route("loadDocumentPage")]
+        public HttpResponseMessage GetDocumentPage(PostedDataEntity postedData)
+        {
+            string password;
+            try
+            {
+                string documentGuid = postedData.guid;
+                int pageNumber = postedData.page;
+                password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
+
+                var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
+                string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
+                string htmlResourcePrefix = "/viewer/resources/";
+
+                IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
+
+                PageDescriptionEntity page;
+                if (globalConfiguration.Viewer.GetIsHtmlMode())
+                {
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                    {
+                        page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
+                    }
+                }
+                else
+                {
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
+                    {
+                        page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
+                    }
+                }
+
+                return this.Request.CreateResponse(HttpStatusCode.OK, page);
+            }
+            catch (Exception ex)
+            {
+                // set exception message
+                return this.Request.CreateResponse(HttpStatusCode.Forbidden, Resources.GenerateException(ex, postedData.password));
+            }
+        }
+
+        /// <summary>
         /// Rotates specific page(s) of the document.
         /// </summary>
         /// <param name="postedData">Document page number to rotate and rotation angle.</param>
@@ -206,18 +253,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // set exception message
                 return this.Request.CreateResponse(HttpStatusCode.InternalServerError, Resources.GenerateException(ex));
             }
-        }
-
-        private PageDescriptionEntity GetPageDescritpionEntity(ICustomViewer customViewer, string documentGuid, int pageNumber, string fileCacheSubFolder)
-        {
-            PageDescriptionEntity page;
-            customViewer.CreateCache();
-
-            var viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
-            page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
-            page.SetData(GetPageContent(pageNumber, documentGuid, cachePath));
-
-            return page;
         }
 
         /// <summary>
@@ -385,18 +420,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
         }
 
-        private static string GetFileCacheFolderName(string filesDirectory, string documentGuid)
-        {
-            var parts = documentGuid
-                .Replace(filesDirectory, string.Empty)
-                .Replace(".", "_")
-                .Split(Path.GetInvalidPathChars());
-
-            var folderName = string.Join("_", parts)
-                .Trim(Path.DirectorySeparatorChar);
-            return folderName;
-        }
-
         /// <summary>
         /// Gets page dimensions and rotation angle.
         /// </summary>
@@ -560,26 +583,26 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
 
-            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
+            LoadDocumentEntity loadDocumentEntity;
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
                 using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
                 {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, password, fileCacheSubFolder, htmlViewer);
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer);
                 }
             }
             else
             {
                 using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
                 {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, password, fileCacheSubFolder, pngViewer);
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer);
                 }
             }
 
             return loadDocumentEntity;
         }
 
-        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string password, string fileCacheSubFolder, ICustomViewer customViewer)
+        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCacheSubFolder, ICustomViewer customViewer)
         {
             if (loadAllPages)
             {
@@ -612,53 +635,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return loadDocumentEntity;
         }
 
-        /// <summary>
-        /// Gets document page info.
-        /// </summary>
-        /// <param name="postedData">Posted data with page number.</param>
-        /// <returns>Document page info.</returns>
-        [HttpPost]
-        [Route("loadDocumentPage")]
-        public HttpResponseMessage GetDocumentPage(PostedDataEntity postedData)
-        {
-            string password = string.Empty;
-            try
-            {
-                string documentGuid = postedData.guid;
-                int pageNumber = postedData.page;
-                password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
-
-                var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
-                string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
-                string htmlResourcePrefix = "/viewer/resources/";
-
-                IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
-
-                PageDescriptionEntity page;
-                if (globalConfiguration.Viewer.GetIsHtmlMode())
-                {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
-                    {
-                        page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
-                    }
-                }
-                else
-                {
-                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(postedData.password)))
-                    {
-                        page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
-                    }
-                }
-
-                return this.Request.CreateResponse(HttpStatusCode.OK, page);
-            }
-            catch (Exception ex)
-            {
-                // set exception message
-                return this.Request.CreateResponse(HttpStatusCode.Forbidden, Resources.GenerateException(ex, password));
-            }
-        }
-
         private static void TryCreatePagesInfoXml(string fileCacheSubFolder, dynamic viewInfo, out string pagesInfoPath)
         {
             if (!Directory.Exists(fileCacheSubFolder))
@@ -683,6 +659,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
                 xdoc.Save(pagesInfoPath);
             }
+        }
+
+        private PageDescriptionEntity GetPageDescritpionEntity(ICustomViewer customViewer, string documentGuid, int pageNumber, string fileCacheSubFolder)
+        {
+            PageDescriptionEntity page;
+            customViewer.CreateCache();
+
+            var viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
+            page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
+            page.SetData(GetPageContent(pageNumber, documentGuid, cachePath));
+
+            return page;
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
+using GroupDocs.Viewer.Exceptions;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 {
@@ -37,13 +38,29 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             {
                 // the mutex cannot be opened, probably because a Win32 object of a different
                 // type with the same name already exists.
-                throw new Exception("Mutex can't be opened: " + ex.Message);
+                throw new GroupDocsViewerException("Mutex can't be opened: " + ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
                 // the mutex exists, but the current process or thread token does not
                 // have permission to open the mutex with SYNCHRONIZE | MUTEX_MODIFY rights.
-                throw new Exception("Current process does not have permission to open the mutex: " + ex.Message);
+                throw new GroupDocsViewerException("Current process does not have permission to open the mutex: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Releases mutex.
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.mutex != null)
+            {
+                if (this.isMutexOwner)
+                {
+                    this.mutex.ReleaseMutex();
+                }
+
+                this.mutex.Close();
             }
         }
 
@@ -63,7 +80,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
             string mutexId = normalized;
             if (mutexId.Length < MaxMutexIdLength)
+            {
                 return mutexId;
+            }
 
             int maxPathLength = MaxMutexIdLength;
 
@@ -72,22 +91,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
                 : normalized;
 
             return trimmedPath;
-        }
-
-        /// <summary>
-        /// Releases mutex.
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.mutex != null)
-            {
-                if (this.isMutexOwner)
-                {
-                    this.mutex.ReleaseMutex();
-                }
-
-                this.mutex.Close();
-            }
         }
     }
 }

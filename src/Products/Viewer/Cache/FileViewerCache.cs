@@ -58,9 +58,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
             string filePath = this.GetCacheFilePath(key);
 
-            if (value is Stream)
+            Stream src = value as Stream;
+            if (src != null)
             {
-                var src = (Stream)value;
                 using (FileStream dst = this.GetStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     src.Position = 0;
@@ -193,7 +193,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             byte[] buffer = new byte[bufferSize];
             int read;
             while ((read = src.Read(buffer, 0, buffer.Length)) != 0)
+            {
                 dst.Write(buffer, 0, read);
+            }
         }
 
         private class IgnoreAssemblyVersionSerializationBinder : SerializationBinder
