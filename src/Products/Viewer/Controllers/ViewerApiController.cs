@@ -171,21 +171,20 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
                 var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
                 string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
-                string htmlResourcePrefix = "/viewer/resources/";
 
                 IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
 
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
@@ -225,23 +224,20 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 // Getting new rotation angle value.
                 var currentAngle = GetCurrentAngle(pageNumber, Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
                 int newAngle = GetNewAngleValue(currentAngle, postedData.angle);
-
-                string htmlResourcePrefix = "/viewer/resources/";
-                IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
-
                 SaveChangedAngleInCache(fileCacheSubFolder, pageNumber, newAngle);
 
+                IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password), pageNumber, newAngle))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password), pageNumber, newAngle))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password), pageNumber, newAngle))
+                    using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password), pageNumber, newAngle))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCacheSubFolder);
                     }
@@ -575,7 +571,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
             string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
-            string htmlResourcePrefix = "/viewer/resources/";
 
             if (!File.Exists(documentGuid))
             {
@@ -587,14 +582,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             LoadDocumentEntity loadDocumentEntity;
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
+                using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password)))
                 {
                     loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer);
                 }
             }
             else
             {
-                using (PngViewer pngViewer = new PngViewer(documentGuid, htmlResourcePrefix, cache, GetLoadOptions(password)))
+                using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password)))
                 {
                     loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer);
                 }

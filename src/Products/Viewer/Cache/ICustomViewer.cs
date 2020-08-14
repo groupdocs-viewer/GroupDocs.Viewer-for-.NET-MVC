@@ -5,9 +5,5 @@
         GroupDocs.Viewer.Viewer GetViewer();
 
         void CreateCache();
-
-        Results.FileInfo GetFileInfo();
-
-        System.IO.FileInfo GetPageFile(int pageNumber);
     }
 }

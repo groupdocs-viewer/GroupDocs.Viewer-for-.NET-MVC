@@ -9,7 +9,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
     class HtmlViewer : IDisposable, ICustomViewer
     {
         private readonly string filePath;
-        private readonly string htmlResourcePrefix;
         private readonly IViewerCache cache;
 
         private readonly GroupDocs.Viewer.Viewer viewer;
@@ -17,11 +16,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         private readonly ViewInfoOptions viewInfoOptions;
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
-        public HtmlViewer(string filePath, string htmlResourcePrefix, IViewerCache cache, LoadOptions loadOptions, int pageNumber = -1, int newAngle = 0)
+        public HtmlViewer(string filePath, IViewerCache cache, LoadOptions loadOptions, int pageNumber = -1, int newAngle = 0)
         {
             this.cache = cache;
             this.filePath = filePath;
-            this.htmlResourcePrefix = htmlResourcePrefix;
             this.viewer = new GroupDocs.Viewer.Viewer(filePath, loadOptions);
             this.viewOptions = this.CreateHtmlViewOptions(pageNumber, newAngle);
             this.viewInfoOptions = ViewInfoOptions.FromHtmlViewOptions(this.viewOptions);
