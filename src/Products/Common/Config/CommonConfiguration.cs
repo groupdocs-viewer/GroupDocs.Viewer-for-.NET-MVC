@@ -7,7 +7,7 @@ using System.Configuration;
 namespace GroupDocs.Viewer.MVC.Products.Common.Config
 {
     /// <summary>
-    /// CommonConfiguration
+    /// CommonConfiguration.
     /// </summary>
     public class CommonConfiguration : ConfigurationSection
     {
@@ -35,7 +35,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
         private NameValueCollection commonConfiguration = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection("commonConfiguration");
 
         /// <summary>
-        /// Constructor
+        /// Constructor.
         /// </summary>
         public CommonConfiguration()
         {
