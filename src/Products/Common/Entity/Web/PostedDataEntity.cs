@@ -32,10 +32,5 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         /// Collection of the document pages with their data.
         /// </summary>
         public List<int> pages { get; set; }
-
-        /// <summary>
-        /// Flag loading pages data.
-        /// </summary>
-        public bool loadData { get; set; }
     }
 }

@@ -136,7 +136,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0, true);
+                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);
@@ -391,7 +391,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("loadThumbnails")]
         public LoadDocumentEntity GetPagesThumbnails(PostedDataEntity loadDocumentRequest)
         {
-            return GetDocumentPages(loadDocumentRequest, true, loadDocumentRequest.loadData);
+            return GetDocumentPages(loadDocumentRequest, true);
         }
 
         /// <summary>
@@ -405,7 +405,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true, true);
+                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
@@ -563,7 +563,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Posted data with document guid.</param>
         /// <param name="loadAllPages">Flag to load all pages.</param>
         /// <returns>Document pages data, dimensions and rotation angles.</returns>
-        private static LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages, bool loadPagesData)
+        private static LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages)
         {
             // get/set parameters
             string documentGuid = postedData.guid;
@@ -584,21 +584,21 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             {
                 using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password)))
                 {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer, loadPagesData);
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer);
                 }
             }
             else
             {
                 using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password)))
                 {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer, loadPagesData);
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer);
                 }
             }
 
             return loadDocumentEntity;
         }
 
-        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCacheSubFolder, ICustomViewer customViewer, bool loadPagesData)
+        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCacheSubFolder, ICustomViewer customViewer)
         {
             if (loadAllPages)
             {
@@ -619,7 +619,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             foreach (Page page in viewInfo.Pages)
             {
                 PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
-                if (loadAllPages && loadPagesData)
+                if (loadAllPages)
                 {
                     pageData.SetData(GetPageContent(page.Number, documentGuid, cachePath));
                 }
