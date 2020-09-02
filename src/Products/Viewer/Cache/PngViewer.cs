@@ -16,11 +16,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         private readonly ViewInfoOptions viewInfoOptions;
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
-        public PngViewer(string filePath, IViewerCache cache, LoadOptions loadOptions, int pageNumber = -1, int newAngle = 0)
+        public PngViewer(GroupDocs.Viewer.Common.Func<Stream> getFileStream, string filePath, IViewerCache cache, GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions, int pageNumber = -1, int newAngle = 0)
         {
             this.cache = cache;
             this.filePath = filePath;
-            this.viewer = new GroupDocs.Viewer.Viewer(filePath, loadOptions);
+            this.viewer = new GroupDocs.Viewer.Viewer(getFileStream, getLoadOptions);
             this.pngViewOptions = this.CreatePngViewOptions(pageNumber, newAngle);
             this.viewInfoOptions = ViewInfoOptions.FromPngViewOptions(this.pngViewOptions);
         }
