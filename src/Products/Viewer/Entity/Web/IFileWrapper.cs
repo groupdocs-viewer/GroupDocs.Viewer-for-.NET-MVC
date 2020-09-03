@@ -1,5 +1,5 @@
-﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
-using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
+﻿using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
+using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 using System.Collections.Generic;
 using System.IO;
 
@@ -7,20 +7,16 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
     interface IFileWrapper
     {
-        string GetId(string guid);
-
-        string GetFileFolderName(string guid);
-
-        string GetFilePath(string guid);
-
         Stream GetFileStream(string guid);
+
+        string GetFileCachePath(string guid);
 
         List<FileDescriptionEntity> GetFilesList();
 
         string GetFileName(string guid);
 
-        string SetId();
+        void SetFileName(string fileName);
 
-        string SetFileName();
+        void CreateCache(ICustomViewer customCache);
     }
 }

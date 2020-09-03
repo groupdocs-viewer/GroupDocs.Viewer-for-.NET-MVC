@@ -8,18 +8,17 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 {
     class HtmlViewer : IDisposable, ICustomViewer
     {
-        private readonly string filePath;
+        private readonly string fileName;
         private readonly IViewerCache cache;
-
         private readonly GroupDocs.Viewer.Viewer viewer;
         private readonly HtmlViewOptions viewOptions;
         private readonly ViewInfoOptions viewInfoOptions;
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
-        public HtmlViewer(GroupDocs.Viewer.Common.Func<Stream> getFileStream, string filePath, IViewerCache cache, GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions, int pageNumber = -1, int newAngle = 0)
+        public HtmlViewer(GroupDocs.Viewer.Common.Func<Stream> getFileStream, string fileName, IViewerCache cache, GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions, int pageNumber = -1, int newAngle = 0)
         {
             this.cache = cache;
-            this.filePath = filePath;
+            this.fileName = fileName;
             this.viewer = new GroupDocs.Viewer.Viewer(getFileStream, getLoadOptions);
             this.viewOptions = this.CreateHtmlViewOptions(pageNumber, newAngle);
             this.viewInfoOptions = ViewInfoOptions.FromHtmlViewOptions(this.viewOptions);
@@ -35,22 +34,22 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             HtmlViewOptions htmlViewOptions = HtmlViewOptions.ForExternalResources(
                 pageNumber =>
             {
-                string fileName = $"p{pageNumber}.html";
-                string cacheFilePath = this.cache.GetCacheFilePath(fileName);
+                string resourceFileName = $"p{pageNumber}.html";
+                string cacheFilePath = this.cache.GetCacheFilePath(resourceFileName);
 
                 return File.Create(cacheFilePath);
             },
                 (pageNumber, resource) =>
                 {
-                    string fileName = $"p{pageNumber}_{resource.FileName}";
-                    string cacheFilePath = this.cache.GetCacheFilePath(fileName);
+                    string resourceFileName = $"p{pageNumber}_{resource.FileName}";
+                    string cacheFilePath = this.cache.GetCacheFilePath(resourceFileName);
 
                     return File.Create(cacheFilePath);
                 },
                 (pageNumber, resource) =>
                 {
-                    var urlPrefix = "/viewer/resources/" + Path.GetFileName(this.filePath).Replace(".", "_");
-                    return $"{urlPrefix}/p{ pageNumber}_{ resource.FileName}";
+                    var urlSuffix = "/viewer/resources/" + this.fileName.Replace(".", "_");
+                    return $"{urlSuffix}/p{ pageNumber}_{ resource.FileName}";
                 });
 
             htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
@@ -110,7 +109,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         {
             ViewInfo viewInfo = this.GetViewInfo();
 
-            using (new CrossProcessLock(this.filePath))
+            using (new CrossProcessLock(this.fileName))
             {
                 int[] missingPages = this.GetPagesMissingFromCache(viewInfo.Pages);
 
@@ -152,7 +151,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         private Results.FileInfo ReadFileInfo()
         {
-            using (new CrossProcessLock(this.filePath))
+            using (new CrossProcessLock(this.fileName))
             {
                 Results.FileInfo fileInfo = this.viewer.GetFileInfo();
                 return fileInfo;
@@ -165,7 +164,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
             if (!this.cache.Contains(cacheKey))
             {
-                using (new CrossProcessLock(this.filePath))
+                using (new CrossProcessLock(this.fileName))
                 {
                     if (!this.cache.Contains(cacheKey))
                     {

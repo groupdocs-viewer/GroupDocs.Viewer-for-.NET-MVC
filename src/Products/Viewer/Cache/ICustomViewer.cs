@@ -1,6 +1,6 @@
 ﻿namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 {
-    interface ICustomViewer
+    public interface ICustomViewer
     {
         GroupDocs.Viewer.Viewer GetViewer();
 

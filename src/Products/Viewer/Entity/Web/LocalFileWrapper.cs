@@ -1,6 +1,7 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
 using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
+using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,20 +11,26 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
     public class LocalFileWrapper : IFileWrapper
     {
         private GlobalConfiguration globalConfiguration;
+        private string FileName;
 
         public LocalFileWrapper(GlobalConfiguration globalConfiguration)
         {
             this.globalConfiguration = globalConfiguration;
         }
 
-        public string GetFileFolderName(string guid)
+        public void CreateCache(ICustomViewer customCache)
         {
-            return this.GetFileName(guid).Replace(".", "_");
+            customCache.CreateCache();
         }
 
-        public string GetFilePath(string guid)
+        public string GetFileCachePath(string fileName)
         {
-            return guid;
+            return Path.Combine(this.globalConfiguration.Viewer.GetFilesDirectory(), this.globalConfiguration.Viewer.GetCacheFolderName(), this.GetFileName(fileName).Replace('.', '_'));
+        }
+
+        public string GetFileName(string guid)
+        {
+            return Path.GetFileName(guid);
         }
 
         public List<FileDescriptionEntity> GetFilesList()
@@ -80,24 +87,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
             return File.OpenRead(guid);
         }
 
-        public string GetId(string guid)
+        public void SetFileName(string fileName)
         {
-            return guid;
-        }
-
-        public string GetFileName(string guid)
-        {
-            return Path.GetFileName(guid);
-        }
-
-        public string SetId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string SetFileName()
-        {
-            throw new NotImplementedException();
+            this.FileName = fileName;
         }
     }
 }
