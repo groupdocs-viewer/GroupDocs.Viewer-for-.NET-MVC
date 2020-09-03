@@ -54,7 +54,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
             }
 
-            this.FileWrapper = new LocalFileWrapper(globalConfiguration);
+            //this.FileWrapper = new LocalFileWrapper(globalConfiguration);
+            this.FileWrapper = new UrlFileWrapper(globalConfiguration);
         }
 
         /// <summary>
@@ -102,7 +103,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0, this.FileWrapper);
+                var urlPostedData = postedData;
+                urlPostedData.guid = "http://www.africau.edu/images/default/sample.pdf";
+                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(urlPostedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0, this.FileWrapper);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);

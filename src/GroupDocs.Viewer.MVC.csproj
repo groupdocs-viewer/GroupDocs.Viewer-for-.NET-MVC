@@ -177,6 +177,7 @@
     <Compile Include="Products\Viewer\Config\ViewerConfiguration.cs" />
     <Compile Include="Products\Viewer\Controllers\ViewerApiController.cs" />
     <Compile Include="Products\Common\Entity\Web\PostedDataEntity.cs" />
+    <Compile Include="Products\Viewer\Entity\Web\UrlFileWrapper.cs" />
     <Compile Include="Products\Viewer\Entity\Web\LocalFileWrapper.cs" />
     <Compile Include="Products\Viewer\Entity\Web\RotatedPageEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
