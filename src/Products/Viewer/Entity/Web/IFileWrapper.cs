@@ -2,6 +2,7 @@
 using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
@@ -18,5 +19,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
         void SetFileName(string fileName);
 
         void CreateCache(ICustomViewer customCache);
+
+        UploadedDocumentEntity UploadFile();
+
+        HttpResponseMessage DownloadFile(string path);
     }
 }

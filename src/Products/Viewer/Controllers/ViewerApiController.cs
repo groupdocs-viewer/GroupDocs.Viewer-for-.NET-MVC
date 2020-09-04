@@ -217,21 +217,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("downloadDocument")]
         public HttpResponseMessage DownloadDocument(string path)
         {
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (File.Exists(path))
-                {
-                    HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
-                    var fileStream = new FileStream(path, FileMode.Open);
-                    response.Content = new StreamContent(fileStream);
-                    response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                    response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-                    response.Content.Headers.ContentDisposition.FileName = Path.GetFileName(path);
-                    return response;
-                }
-            }
-
-            return new HttpResponseMessage(HttpStatusCode.NotFound);
+            return this.FileWrapper.DownloadFile(path);
         }
 
         /// <summary>
@@ -271,61 +257,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                string url = HttpContext.Current.Request.Form["url"];
-
-                // get documents storage path
-                string documentStoragePath = globalConfiguration.Viewer.GetFilesDirectory();
-                bool rewrite = bool.Parse(HttpContext.Current.Request.Form["rewrite"]);
-                string fileSavePath = string.Empty;
-                if (string.IsNullOrEmpty(url))
-                {
-                    if (HttpContext.Current.Request.Files.AllKeys != null)
-                    {
-                        // Get the uploaded document from the Files collection
-                        var httpPostedFile = HttpContext.Current.Request.Files["file"];
-                        if (httpPostedFile != null)
-                        {
-                            if (rewrite)
-                            {
-                                // Get the complete file path
-                                fileSavePath = Path.Combine(documentStoragePath, httpPostedFile.FileName);
-                            }
-                            else
-                            {
-                                fileSavePath = Resources.GetFreeFileName(documentStoragePath, httpPostedFile.FileName);
-                            }
-
-                            // Save the uploaded file to "UploadedFiles" folder
-                            httpPostedFile.SaveAs(fileSavePath);
-                        }
-                    }
-                }
-                else
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        // get file name from the URL
-                        Uri uri = new Uri(url);
-                        string fileName = Path.GetFileName(uri.LocalPath);
-                        if (rewrite)
-                        {
-                            // Get the complete file path
-                            fileSavePath = Path.Combine(documentStoragePath, fileName);
-                        }
-                        else
-                        {
-                            fileSavePath = Resources.GetFreeFileName(documentStoragePath, fileName);
-                        }
-
-                        // Download the Web resource and save it into the current filesystem folder.
-                        client.DownloadFile(url, fileSavePath);
-                    }
-                }
-
-                UploadedDocumentEntity uploadedDocument = new UploadedDocumentEntity
-                {
-                    guid = fileSavePath,
-                };
+                UploadedDocumentEntity uploadedDocument = this.FileWrapper.UploadFile();
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, uploadedDocument);
             }
@@ -567,6 +499,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             }
 
             loadDocumentEntity.SetGuid(documentGuid);
+
             return loadDocumentEntity;
         }
 
