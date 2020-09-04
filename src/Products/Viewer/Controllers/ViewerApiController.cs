@@ -37,7 +37,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
         
-        private IFileWrapper FileWrapper;
+        private readonly IFileWrapper FileWrapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ViewerApiController"/> class.
@@ -75,9 +75,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                List<FileDescriptionEntity> filesList = new List<FileDescriptionEntity>();
-
-                filesList = this.FileWrapper.GetFilesList();
+                List<FileDescriptionEntity> filesList = this.FileWrapper.GetFilesList();
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, filesList);
             }

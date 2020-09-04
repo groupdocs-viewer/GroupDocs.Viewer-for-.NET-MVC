@@ -2,7 +2,6 @@
 using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
 using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,7 +9,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
     public class LocalFileWrapper : IFileWrapper
     {
-        private GlobalConfiguration globalConfiguration;
+        private readonly GlobalConfiguration globalConfiguration;
         private string FileName;
 
         public LocalFileWrapper(GlobalConfiguration globalConfiguration)
