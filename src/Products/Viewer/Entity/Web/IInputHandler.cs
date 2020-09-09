@@ -6,7 +6,7 @@ using System.Net.Http;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
-    interface IFileWrapper
+    interface IInputHandler
     {
         Stream GetFileStream(string guid);
 

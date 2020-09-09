@@ -37,7 +37,9 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
         
-        private readonly IFileWrapper FileWrapper;
+        private readonly IInputHandler InputHandler;
+
+        private readonly ICacheHandler CacheHandler;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ViewerApiController"/> class.
@@ -50,7 +52,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
             }
 
-            this.FileWrapper = new LocalFileWrapper(globalConfiguration);
+            this.InputHandler = new LocalInputHandler(globalConfiguration);
+            this.CacheHandler = new LocalCacheHandler();
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                List<FileDescriptionEntity> filesList = this.FileWrapper.GetFilesList();
+                List<FileDescriptionEntity> filesList = this.InputHandler.GetFilesList();
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, filesList);
             }
@@ -96,7 +99,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0, this.FileWrapper);
+                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0, this.InputHandler);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);
@@ -128,21 +131,21 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 string documentGuid = postedData.guid;
                 int pageNumber = postedData.page;
                 password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
-                string fileCachePath = this.FileWrapper.GetFileCachePath(documentGuid);
+                string fileCachePath = this.InputHandler.GetFileCachePath(documentGuid);
 
                 IViewerCache cache = new FileViewerCache(fileCachePath);
 
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.FileWrapper.GetFileStream(documentGuid), this.FileWrapper.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCachePath);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(() => this.FileWrapper.GetFileStream(documentGuid), this.FileWrapper.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                    using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCachePath);
                     }
@@ -171,7 +174,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 var documentGuid = postedData.guid;
                 var pageNumber = postedData.pages[0];
                 string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
-                string fileCachePath = this.FileWrapper.GetFileCachePath(documentGuid);
+                string fileCachePath = this.InputHandler.GetFileCachePath(documentGuid);
 
                 // Delete page cache-files before regenerating with another angle.
                 var cacheFiles = Directory.GetFiles(fileCachePath).Where(f => Path.GetFileName(f).StartsWith($"p{pageNumber}"));
@@ -186,14 +189,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.FileWrapper.GetFileStream(documentGuid), this.FileWrapper.GetFileName(documentGuid), cache, () => GetLoadOptions(password), pageNumber, newAngle))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password), pageNumber, newAngle))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCachePath);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(() => this.FileWrapper.GetFileStream(documentGuid), this.FileWrapper.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                    using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCachePath);
                     }
@@ -217,7 +220,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("downloadDocument")]
         public HttpResponseMessage DownloadDocument(string path)
         {
-            return this.FileWrapper.DownloadFile(path);
+            return this.InputHandler.DownloadFile(path);
         }
 
         /// <summary>
@@ -257,7 +260,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                UploadedDocumentEntity uploadedDocument = this.FileWrapper.UploadFile();
+                UploadedDocumentEntity uploadedDocument = this.InputHandler.UploadFile();
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, uploadedDocument);
             }
@@ -277,7 +280,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("loadThumbnails")]
         public LoadDocumentEntity GetPagesThumbnails(PostedDataEntity loadDocumentRequest)
         {
-            return GetDocumentPages(loadDocumentRequest, true, this.FileWrapper);
+            return GetDocumentPages(loadDocumentRequest, true, this.InputHandler);
         }
 
         /// <summary>
@@ -291,7 +294,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true, this.FileWrapper);
+                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true, this.InputHandler);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
@@ -446,7 +449,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Posted data with document guid.</param>
         /// <param name="loadAllPages">Flag to load all pages.</param>
         /// <returns>Document pages data, dimensions and rotation angles.</returns>
-        private LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages, IFileWrapper fileWrapper)
+        private LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages, IInputHandler fileWrapper)
         {
             // get/set parameters
             string documentGuid = postedData.guid;
@@ -474,11 +477,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             return loadDocumentEntity;
         }
 
-        private LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCachePath, ICustomViewer customViewer, IFileWrapper fileWrapper)
+        private LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCachePath, ICustomViewer customViewer, IInputHandler fileWrapper)
         {
             if (loadAllPages)
             {
-                this.FileWrapper.CreateCache(customViewer);
+                this.CacheHandler.CreateCache(customViewer);
             }
 
             dynamic viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
@@ -536,7 +539,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             var viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
             page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCachePath, "PagesInfo.xml"));
-            page.SetData(GetPageContent(pageNumber, this.FileWrapper.GetFileCachePath(documentGuid)));
+            page.SetData(GetPageContent(pageNumber, this.InputHandler.GetFileCachePath(documentGuid)));
 
             return page;
         }

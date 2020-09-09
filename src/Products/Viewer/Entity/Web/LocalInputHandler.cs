@@ -13,12 +13,12 @@ using System.Web;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
-    public class LocalFileWrapper : IFileWrapper
+    public class LocalInputHandler : IInputHandler
     {
         private readonly GlobalConfiguration globalConfiguration;
         private string FileName;
 
-        public LocalFileWrapper(GlobalConfiguration globalConfiguration)
+        public LocalInputHandler(GlobalConfiguration globalConfiguration)
         {
             this.globalConfiguration = globalConfiguration;
         }
