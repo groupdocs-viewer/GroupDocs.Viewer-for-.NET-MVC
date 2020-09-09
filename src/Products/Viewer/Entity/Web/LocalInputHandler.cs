@@ -23,16 +23,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
             this.globalConfiguration = globalConfiguration;
         }
 
-        public void CreateCache(ICustomViewer customCache)
-        {
-            customCache.CreateCache();
-        }
-
-        public string GetFileCachePath(string fileName)
-        {
-            return Path.Combine(this.globalConfiguration.Viewer.GetFilesDirectory(), this.globalConfiguration.Viewer.GetCacheFolderName(), this.GetFileName(fileName).Replace('.', '_'));
-        }
-
         public string GetFileName(string guid)
         {
             return Path.GetFileName(guid);

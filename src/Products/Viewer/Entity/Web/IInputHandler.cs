@@ -10,15 +10,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
     {
         Stream GetFileStream(string guid);
 
-        string GetFileCachePath(string guid);
-
         List<FileDescriptionEntity> GetFilesList();
 
         string GetFileName(string guid);
 
         void SetFileName(string fileName);
-
-        void CreateCache(ICustomViewer customCache);
 
         UploadedDocumentEntity UploadFile();
 
