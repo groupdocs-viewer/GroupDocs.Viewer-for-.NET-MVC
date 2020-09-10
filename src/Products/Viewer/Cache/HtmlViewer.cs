@@ -48,8 +48,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
                 },
                 (pageNumber, resource) =>
                 {
-                    var urlSuffix = "/viewer/resources/" + this.fileName.Replace(".", "_");
-                    return $"{urlSuffix}/p{ pageNumber}_{ resource.FileName}";
+                    var urlPrefix = "/viewer/resources/" + this.fileName.Replace(".", "_");
+                    return $"{urlPrefix}/p{pageNumber}_{resource.FileName}";
                 });
 
             htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;

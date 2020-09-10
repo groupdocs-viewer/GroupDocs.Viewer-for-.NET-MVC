@@ -1,23 +1,17 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
-using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 {
     interface IInputHandler
     {
-        Stream GetFileStream(string guid);
-
-        List<FileDescriptionEntity> GetFilesList();
+        Stream GetFile(string guid);
 
         string GetFileName(string guid);
 
-        void SetFileName(string fileName);
+        string StoreFile(Stream inputStream, string fileName, bool rewrite);
 
-        UploadedDocumentEntity UploadFile();
-
-        HttpResponseMessage DownloadFile(string path);
+        List<FileDescriptionEntity> GetFilesList();
     }
 }

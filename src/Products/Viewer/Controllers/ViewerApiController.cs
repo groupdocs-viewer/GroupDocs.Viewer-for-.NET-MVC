@@ -138,14 +138,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCachePath);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                    using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCachePath);
                     }
@@ -189,14 +189,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity page;
                 if (globalConfiguration.Viewer.GetIsHtmlMode())
                 {
-                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password), pageNumber, newAngle))
+                    using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password), pageNumber, newAngle))
                     {
                         page = this.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCachePath);
                     }
                 }
                 else
                 {
-                    using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFileStream(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                    using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                     {
                         page = this.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCachePath);
                     }
@@ -220,7 +220,18 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         [Route("downloadDocument")]
         public HttpResponseMessage DownloadDocument(string path)
         {
-            return this.InputHandler.DownloadFile(path);
+            if (!string.IsNullOrEmpty(path))
+            {
+                var fileStream = this.InputHandler.GetFile(path);
+                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+                response.Content = new StreamContent(fileStream);
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                response.Content.Headers.ContentDisposition.FileName = this.InputHandler.GetFileName(path);
+                return response;
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 
         /// <summary>
@@ -260,7 +271,42 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                UploadedDocumentEntity uploadedDocument = this.InputHandler.UploadFile();
+                string url = HttpContext.Current.Request.Form["url"];
+
+                // get documents storage path
+                string documentStoragePath = globalConfiguration.Viewer.GetFilesDirectory();
+                bool rewrite = bool.Parse(HttpContext.Current.Request.Form["rewrite"]);
+                string fileSavePath = string.Empty;
+                if (string.IsNullOrEmpty(url))
+                {
+                    if (HttpContext.Current.Request.Files.AllKeys != null)
+                    {
+                        // Get the uploaded document from the Files collection.
+                        var httpPostedFile = HttpContext.Current.Request.Files["file"];
+                        if (httpPostedFile != null)
+                        {
+                            fileSavePath = this.InputHandler.StoreFile(httpPostedFile.InputStream, httpPostedFile.FileName, rewrite);
+                        }
+                    }
+                }
+                else
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        // Get file name from the URL.
+                        Uri uri = new Uri(url);
+                        string fileName = Path.GetFileName(uri.LocalPath);
+                        var byteArray = client.DownloadData(url);
+                        Stream fileStream = new MemoryStream(byteArray);
+
+                        fileSavePath = this.InputHandler.StoreFile(fileStream, fileName, rewrite);
+                    }
+                }
+
+                UploadedDocumentEntity uploadedDocument = new UploadedDocumentEntity
+                {
+                    guid = fileSavePath,
+                };
 
                 return this.Request.CreateResponse(HttpStatusCode.OK, uploadedDocument);
             }
@@ -461,14 +507,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             LoadDocumentEntity loadDocumentEntity;
             if (globalConfiguration.Viewer.GetIsHtmlMode())
             {
-                using (HtmlViewer htmlViewer = new HtmlViewer(() => inputHandler.GetFileStream(documentGuid), inputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                using (HtmlViewer htmlViewer = new HtmlViewer(() => inputHandler.GetFile(documentGuid), inputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                 {
                     loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCachePath, htmlViewer, cacheHandler);
                 }
             }
             else
             {
-                using (PngViewer pngViewer = new PngViewer(() => inputHandler.GetFileStream(documentGuid), inputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
+                using (PngViewer pngViewer = new PngViewer(() => inputHandler.GetFile(documentGuid), inputHandler.GetFileName(documentGuid), cache, () => GetLoadOptions(password)))
                 {
                     loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCachePath, pngViewer, cacheHandler);
                 }
