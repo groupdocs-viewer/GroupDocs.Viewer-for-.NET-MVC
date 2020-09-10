@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
+namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
 {
     interface IInputHandler
     {

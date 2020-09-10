@@ -2,7 +2,7 @@
 using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 using System.IO;
 
-namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
+namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
 {
     public class LocalCacheHandler : ICacheHandler
     {
@@ -20,7 +20,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
 
         public void CreateCache(ICustomViewer customCache)
         {
-            customCache.CreateCache();
+            customCache.GenerateFileCache();
         }
     }
 }

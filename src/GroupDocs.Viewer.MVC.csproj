@@ -154,8 +154,8 @@
     <Compile Include="Products\Common\Config\ServerConfiguration.cs" />
     <Compile Include="Products\Common\Entity\Web\ExceptionEntity.cs" />
     <Compile Include="Products\Common\Entity\Web\FileDescriptionEntity.cs" />
-    <Compile Include="Products\Viewer\Entity\Web\ICacheHandler.cs" />
-    <Compile Include="Products\Viewer\Entity\Web\IInputHandler.cs" />
+    <Compile Include="Products\Viewer\Util\ICacheHandler.cs" />
+    <Compile Include="Products\Viewer\Util\IInputHandler.cs" />
     <Compile Include="Products\Common\Entity\Web\LoadDocumentEntity.cs" />
     <Compile Include="Products\Common\Entity\Web\PageDescriptionEntity.cs" />
     <Compile Include="Products\Common\Entity\Web\UploadedDocumentEntity.cs" />
@@ -171,16 +171,17 @@
     <Compile Include="Products\Viewer\Cache\CacheExtensions.cs" />
     <Compile Include="Products\Viewer\Cache\CrossProcessLock.cs" />
     <Compile Include="Products\Viewer\Cache\FileViewerCache.cs" />
-    <Compile Include="Products\Viewer\Cache\ICustomViewer.cs" />
-    <Compile Include="Products\Viewer\Cache\PngViewer.cs" />
-    <Compile Include="Products\Viewer\Cache\HtmlViewer.cs" />
+    <Compile Include="Products\Viewer\Util\ICustomViewer.cs" />
+    <Compile Include="Products\Viewer\Util\PngViewer.cs" />
+    <Compile Include="Products\Viewer\Util\HtmlViewer.cs" />
     <Compile Include="Products\Viewer\Cache\IViewerCache.cs" />
     <Compile Include="Products\Viewer\Config\ViewerConfiguration.cs" />
     <Compile Include="Products\Viewer\Controllers\ViewerApiController.cs" />
     <Compile Include="Products\Common\Entity\Web\PostedDataEntity.cs" />
-    <Compile Include="Products\Viewer\Entity\Web\LocalCacheHandler.cs" />
-    <Compile Include="Products\Viewer\Entity\Web\LocalInputHandler.cs" />
+    <Compile Include="Products\Viewer\Util\LocalCacheHandler.cs" />
+    <Compile Include="Products\Viewer\Util\LocalInputHandler.cs" />
     <Compile Include="Products\Viewer\Entity\Web\RotatedPageEntity.cs" />
+    <Compile Include="Products\Viewer\Util\ViewerApiHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

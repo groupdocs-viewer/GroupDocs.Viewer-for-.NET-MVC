@@ -1,6 +1,6 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 
-namespace GroupDocs.Viewer.MVC.Products.Viewer.Entity.Web
+namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
 {
     interface ICacheHandler
     {
