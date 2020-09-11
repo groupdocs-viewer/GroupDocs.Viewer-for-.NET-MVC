@@ -1,10 +1,11 @@
-﻿using GroupDocs.Viewer.Options;
+﻿using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
+using GroupDocs.Viewer.Options;
 using GroupDocs.Viewer.Results;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
+namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
 {
     class PngViewer : IDisposable, ICustomViewer
     {
@@ -16,11 +17,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         private readonly ViewInfoOptions viewInfoOptions;
         private static readonly Common.Config.GlobalConfiguration globalConfiguration = new Common.Config.GlobalConfiguration();
 
-        public PngViewer(string filePath, IViewerCache cache, LoadOptions loadOptions, int pageNumber = -1, int newAngle = 0)
+        public PngViewer(GroupDocs.Viewer.Common.Func<Stream> getFileStream, string filePath, IViewerCache cache, GroupDocs.Viewer.Common.Func<LoadOptions> getLoadOptions, int pageNumber = -1, int newAngle = 0)
         {
             this.cache = cache;
             this.filePath = filePath;
-            this.viewer = new GroupDocs.Viewer.Viewer(filePath, loadOptions);
+            this.viewer = new GroupDocs.Viewer.Viewer(getFileStream, getLoadOptions);
             this.pngViewOptions = this.CreatePngViewOptions(pageNumber, newAngle);
             this.viewInfoOptions = ViewInfoOptions.FromPngViewOptions(this.pngViewOptions);
         }
@@ -82,7 +83,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         public System.IO.FileInfo GetPageFile(int pageNumber)
         {
-            this.CreateCache();
+            this.GenerateFileCache();
 
             string pageKey = $"p{pageNumber}.png";
             string cacheFilePath = this.cache.GetCacheFilePath(pageKey);
@@ -90,7 +91,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             return new System.IO.FileInfo(cacheFilePath);
         }
 
-        public void CreateCache()
+        public void GenerateFileCache()
         {
             ViewInfo viewInfo = this.GetViewInfo();
 

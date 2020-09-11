@@ -12,36 +12,23 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
         private readonly TimeSpan waitTimeout = TimeSpan.FromMilliseconds(100);
 
         /// <summary>
-        /// Gets the Relative or absolute path to the cache folder.
+        /// Gets file cache path.
         /// </summary>
-        public string CachePath { get; }
-
-        /// <summary>
-        /// Gets the sub-folder to append to the <see cref="CachePath"/>.
-        /// </summary>
-        public string CacheSubFolder { get; }
+        public string FileCachePath { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileViewerCache"/> class.
         /// </summary>
-        /// <param name="cachePath">Relative or absolute path where document cache will be stored.</param>
-        /// <param name="cacheSubFolder">The sub-folder to append to <paramref name="cachePath"/>.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="cachePath"/> is null.</exception>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="cacheSubFolder"/> is null.</exception>
-        public FileViewerCache(string cachePath, string cacheSubFolder)
+        /// <param name="fileCachePath">The file cache path.</param>
+        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="fileCachePath"/> is null.</exception>
+        public FileViewerCache(string fileCachePath)
         {
-            if (cachePath == null)
+            if (fileCachePath == null)
             {
-                throw new ArgumentNullException(nameof(cachePath));
+                throw new ArgumentNullException(nameof(fileCachePath));
             }
 
-            if (cacheSubFolder == null)
-            {
-                throw new ArgumentNullException(nameof(cacheSubFolder));
-            }
-
-            this.CachePath = cachePath;
-            this.CacheSubFolder = cacheSubFolder;
+            this.FileCachePath = fileCachePath;
         }
 
         /// <summary>
@@ -143,7 +130,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         public string GetCacheFilePath(string key)
         {
-            string folderPath = Path.Combine(this.CachePath, this.CacheSubFolder);
+            string folderPath = this.FileCachePath;
             string filePath = Path.Combine(folderPath, key);
 
             if (!Directory.Exists(folderPath))
@@ -156,7 +143,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
 
         public bool Contains(string key)
         {
-            string file = Path.Combine(this.CachePath, this.CacheSubFolder, key);
+            string file = Path.Combine(this.FileCachePath, key);
             return File.Exists(file);
         }
 

@@ -6,14 +6,9 @@
     interface IViewerCache
     {
         /// <summary>
-        /// The Relative or absolute path to the cache folder.
+        /// The file cache path.
         /// </summary>
-        string CachePath { get; }
-
-        /// <summary>
-        /// The sub-folder to append to the <see cref="CachePath"/>.
-        /// </summary>
-        string CacheSubFolder { get; }
+        string FileCachePath { get; }
 
         /// <summary>
         /// Inserts a cache entry into the cache.

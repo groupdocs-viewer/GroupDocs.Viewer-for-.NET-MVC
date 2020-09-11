@@ -58,7 +58,8 @@ viewer:
   # Absolute path to custom fonts directory
   fontsDirectory: ''
   # Default document
-  # Absolute path to default document
+  # Document guid of the file that will be opened after app start.
+  # It could be absolute path to the file, URL or DataBase row Id.
   defaultDocument: ''
   # Pages preload
   # How many pages from a document should be loaded, remaining pages will be loaded on page scrolling
