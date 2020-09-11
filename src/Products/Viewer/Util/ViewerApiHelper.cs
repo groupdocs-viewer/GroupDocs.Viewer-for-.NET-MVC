@@ -171,7 +171,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
             // get/set parameters
             string documentGuid = postedData.guid;
             string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
-            string fileCachePath = cacheHandler.GetFileCachePath(documentGuid);
+            string fileCachePath = cacheHandler.GetFileCachePath(inputHandler.GetFileName(documentGuid));
 
             IViewerCache cache = new FileViewerCache(fileCachePath);
 
@@ -212,7 +212,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
                 PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
                 if (loadAllPages)
                 {
-                    pageData.SetData(GetPageContent(page.Number, cacheHandler.GetFileCachePath(documentGuid)));
+                    pageData.SetData(GetPageContent(page.Number, fileCachePath));
                 }
 
                 loadDocumentEntity.SetPages(pageData);
@@ -249,14 +249,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
             }
         }
 
-        internal PageDescriptionEntity GetPageDescritpionEntity(ICustomViewer customViewer, string documentGuid, int pageNumber, string fileCachePath, ICacheHandler cacheHandler)
+        internal PageDescriptionEntity GetPageDescritpionEntity(ICustomViewer customViewer, int pageNumber, string fileCachePath)
         {
             PageDescriptionEntity page;
             customViewer.GenerateFileCache();
 
             var viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
             page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCachePath, "PagesInfo.xml"));
-            page.SetData(GetPageContent(pageNumber, cacheHandler.GetFileCachePath(documentGuid)));
+            page.SetData(GetPageContent(pageNumber, fileCachePath));
 
             return page;
         }

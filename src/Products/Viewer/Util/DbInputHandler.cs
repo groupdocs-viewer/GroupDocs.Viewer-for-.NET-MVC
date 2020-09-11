@@ -1,14 +1,13 @@
 ﻿using GroupDocs.Viewer.MVC.Products.Common.Config;
 using GroupDocs.Viewer.MVC.Products.Common.Entity.Web;
 using GroupDocs.Viewer.MVC.Products.Common.Resources;
-using GroupDocs.Viewer.MVC.Products.Common.Util.Comparator;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
-{ 
+{
     public class DbInputHandler : IInputHandler
     {
         private readonly GlobalConfiguration globalConfiguration;
@@ -20,7 +19,20 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
 
         public string GetFileName(string guid)
         {
-            return guid;
+            string ext;
+            using (SqlConnection cn = new SqlConnection(@"Data Source =.\SQLEXPRESS; Initial Catalog = tempdb; Integrated Security = True"))
+            using (SqlCommand cm = cn.CreateCommand())
+            {
+                cm.CommandText = @"
+                    SELECT Ext
+                    FROM   tempdb.dbo.Files
+                    WHERE  Id = @Id";
+                cm.Parameters.AddWithValue("@Id", guid);
+                cn.Open();
+                ext = (cm.ExecuteScalar() as string).TrimEnd();
+            }
+
+            return guid + "." + ext;
         }
 
         public List<FileDescriptionEntity> GetFilesList()

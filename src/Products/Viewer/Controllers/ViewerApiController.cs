@@ -129,7 +129,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 string documentGuid = postedData.guid;
                 int pageNumber = postedData.page;
                 password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
-                string fileCachePath = this.CacheHandler.GetFileCachePath(documentGuid);
+                string fileCachePath = this.CacheHandler.GetFileCachePath(this.InputHandler.GetFileName(documentGuid));
 
                 IViewerCache cache = new FileViewerCache(fileCachePath);
 
@@ -138,14 +138,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 {
                     using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => ViewerApiHelper.GetLoadOptions(password)))
                     {
-                        page = this.ViewerApiHelper.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCachePath, this.CacheHandler);
+                        page = this.ViewerApiHelper.GetPageDescritpionEntity(htmlViewer, pageNumber, fileCachePath);
                     }
                 }
                 else
                 {
                     using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => ViewerApiHelper.GetLoadOptions(password)))
                     {
-                        page = this.ViewerApiHelper.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCachePath, this.CacheHandler);
+                        page = this.ViewerApiHelper.GetPageDescritpionEntity(pngViewer, pageNumber, fileCachePath);
                     }
                 }
 
@@ -172,7 +172,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 var documentGuid = postedData.guid;
                 var pageNumber = postedData.pages[0];
                 string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
-                string fileCachePath = this.CacheHandler.GetFileCachePath(documentGuid);
+                string fileCachePath = this.CacheHandler.GetFileCachePath(this.InputHandler.GetFileName(documentGuid));
 
                 // Delete page cache-files before regenerating with another angle.
                 var cacheFiles = Directory.GetFiles(fileCachePath).Where(f => Path.GetFileName(f).StartsWith($"p{pageNumber}"));
@@ -189,14 +189,14 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 {
                     using (HtmlViewer htmlViewer = new HtmlViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => ViewerApiHelper.GetLoadOptions(password), pageNumber, newAngle))
                     {
-                        page = ViewerApiHelper.GetPageDescritpionEntity(htmlViewer, documentGuid, pageNumber, fileCachePath, this.CacheHandler);
+                        page = ViewerApiHelper.GetPageDescritpionEntity(htmlViewer, pageNumber, fileCachePath);
                     }
                 }
                 else
                 {
                     using (PngViewer pngViewer = new PngViewer(() => this.InputHandler.GetFile(documentGuid), this.InputHandler.GetFileName(documentGuid), cache, () => ViewerApiHelper.GetLoadOptions(password)))
                     {
-                        page = ViewerApiHelper.GetPageDescritpionEntity(pngViewer, documentGuid, pageNumber, fileCachePath, this.CacheHandler);
+                        page = ViewerApiHelper.GetPageDescritpionEntity(pngViewer, pageNumber, fileCachePath);
                     }
                 }
 

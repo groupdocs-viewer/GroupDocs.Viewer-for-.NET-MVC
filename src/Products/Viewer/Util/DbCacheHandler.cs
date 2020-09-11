@@ -15,7 +15,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
 
         public string GetFileCachePath(string fileName)
         {
-            return Path.Combine(this.globalConfiguration.Viewer.GetFilesDirectory(), this.globalConfiguration.Viewer.GetCacheFolderName(), fileName);
+            return Path.Combine(this.globalConfiguration.Viewer.GetFilesDirectory(), this.globalConfiguration.Viewer.GetCacheFolderName(), fileName.Replace(".", "_"));
         }
 
         public void CreateCache(ICustomViewer customCache)
