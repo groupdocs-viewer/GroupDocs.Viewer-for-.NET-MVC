@@ -4,12 +4,10 @@ using GroupDocs.Viewer.MVC.Products.Viewer.Cache;
 using GroupDocs.Viewer.Options;
 using GroupDocs.Viewer.Results;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Xml.Linq;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Util

@@ -43,13 +43,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
             conn.Open();
 
             SqlCommand command = new SqlCommand("select Id, Ext from tempdb.dbo.Files", conn);
-            // int result = command.ExecuteNonQuery();
+
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    Console.WriteLine(String.Format("{0}", reader["Id"]));
-
                     FileDescriptionEntity fileDescription = new FileDescriptionEntity
                     {
                         guid = reader["Id"].ToString(),

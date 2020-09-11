@@ -77,8 +77,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Util
             {
                 return File.OpenRead(guid);
             }
-
-            else return new MemoryStream();
+            else
+            {
+                return new MemoryStream();
+            }
         }
 
         public string StoreFile(Stream inputStream, string fileName, bool rewrite)
