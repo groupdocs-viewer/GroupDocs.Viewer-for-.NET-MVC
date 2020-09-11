@@ -172,6 +172,8 @@
     <Compile Include="Products\Viewer\Cache\CrossProcessLock.cs" />
     <Compile Include="Products\Viewer\Cache\FileViewerCache.cs" />
     <Compile Include="Products\Viewer\Util\ICustomViewer.cs" />
+    <Compile Include="Products\Viewer\Util\DbInputHandler.cs" />
+    <Compile Include="Products\Viewer\Util\DbCacheHandler.cs" />
     <Compile Include="Products\Viewer\Util\PngViewer.cs" />
     <Compile Include="Products\Viewer\Util\HtmlViewer.cs" />
     <Compile Include="Products\Viewer\Cache\IViewerCache.cs" />
