@@ -49,8 +49,8 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 fontsDirectory.Add(globalConfiguration.Viewer.GetFontsDirectory());
             }
 
-            this.InputHandler = new DbInputHandler(globalConfiguration);
-            this.CacheHandler = new DbCacheHandler(globalConfiguration);
+            this.InputHandler = new LocalInputHandler(globalConfiguration);
+            this.CacheHandler = new LocalCacheHandler(globalConfiguration);
             this.ViewerApiHelper = new ViewerApiHelper(globalConfiguration);
         }
 
