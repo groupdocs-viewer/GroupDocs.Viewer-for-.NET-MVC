@@ -405,7 +405,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true);
+                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true, true);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
@@ -447,11 +447,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="documentGuid">Document path.</param>
         /// <param name="cachePath">Cache path.</param>
         /// <returns>Page content as a string.</returns>
-        private static string GetPageContent(int pageNumber, string documentGuid, string cachePath)
+        private static string GetPageContent(int pageNumber, string documentGuid, string cachePath, bool printVersion)
         {
             var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
 
-            if (globalConfiguration.Viewer.GetIsHtmlMode())
+            if (globalConfiguration.Viewer.GetIsHtmlMode() && !printVersion)
             {
                 string htmlFilePath = $"{cachePath}/{fileFolderName}/p{pageNumber}.html";
                 return File.ReadAllText(htmlFilePath);
@@ -563,7 +563,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Posted data with document guid.</param>
         /// <param name="loadAllPages">Flag to load all pages.</param>
         /// <returns>Document pages data, dimensions and rotation angles.</returns>
-        private static LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages)
+        private static LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages, bool printVersion = false)
         {
             // get/set parameters
             string documentGuid = postedData.guid;
@@ -580,25 +580,25 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
             IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
 
             LoadDocumentEntity loadDocumentEntity;
-            if (globalConfiguration.Viewer.GetIsHtmlMode())
+            if (globalConfiguration.Viewer.GetIsHtmlMode() && !printVersion)
             {
                 using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password)))
                 {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer);
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer, printVersion);
                 }
             }
             else
             {
                 using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password)))
                 {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer);
+                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer, printVersion);
                 }
             }
 
             return loadDocumentEntity;
         }
 
-        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCacheSubFolder, ICustomViewer customViewer)
+        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCacheSubFolder, ICustomViewer customViewer, bool printVersion)
         {
             if (loadAllPages)
             {
@@ -621,7 +621,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
                 if (loadAllPages)
                 {
-                    pageData.SetData(GetPageContent(page.Number, documentGuid, cachePath));
+                    pageData.SetData(GetPageContent(page.Number, documentGuid, cachePath, printVersion));
                 }
 
                 loadDocumentEntity.SetPages(pageData);
@@ -664,7 +664,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 
             var viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
             page = GetPageInfo(viewInfo.Pages[pageNumber - 1], Path.Combine(fileCacheSubFolder, "PagesInfo.xml"));
-            page.SetData(GetPageContent(pageNumber, documentGuid, cachePath));
+            page.SetData(GetPageContent(pageNumber, documentGuid, cachePath, false));
 
             return page;
         }
