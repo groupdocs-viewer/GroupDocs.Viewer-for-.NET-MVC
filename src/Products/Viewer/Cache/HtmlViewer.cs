@@ -57,8 +57,6 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
             htmlViewOptions.SpreadsheetOptions.RenderGridLines = true;
             htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
-            htmlViewOptions.SpreadsheetOptions.SkipEmptyColumns = true;
-            htmlViewOptions.SpreadsheetOptions.SkipEmptyRows = true;
 
             SetWatermarkOptions(htmlViewOptions);
 
