@@ -7,10 +7,10 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Config
     /// </summary>
     public class GlobalConfiguration
     {
-        public ServerConfiguration Server;
-        public ApplicationConfiguration Application;
-        public CommonConfiguration Common;
-        public ViewerConfiguration Viewer;
+        public ServerConfiguration Server { get; set; }
+        public ApplicationConfiguration Application { get; set; }
+        public CommonConfiguration Common { get; set; }
+        public ViewerConfiguration Viewer { get; set; }
 
         /// <summary>
         /// Get all configurations.

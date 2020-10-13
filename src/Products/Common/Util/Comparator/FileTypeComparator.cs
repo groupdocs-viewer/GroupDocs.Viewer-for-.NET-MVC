@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace GroupDocs.Viewer.MVC.Products.Common.Util.Comparator
@@ -19,13 +21,13 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Util.Comparator
             string strExt1 = Path.GetExtension(x);
             string strExt2 = Path.GetExtension(y);
 
-            if (strExt1.Equals(strExt2))
+            if (string.Equals(strExt1, strExt2, StringComparison.Ordinal))
             {
-                return x.CompareTo(y);
+                return string.Compare(x, y, false, CultureInfo.InvariantCulture);
             }
             else
             {
-                return strExt1.CompareTo(strExt2);
+                return string.Compare(strExt1, strExt2, false, CultureInfo.InvariantCulture);
             }
         }
     }
