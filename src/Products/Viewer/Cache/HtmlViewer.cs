@@ -53,9 +53,11 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
                     return $"{urlPrefix}/p{ pageNumber}_{ resource.FileName}";
                 });
 
+            htmlViewOptions.SpreadsheetOptions = SpreadsheetOptions.ForOnePagePerSheet();
             htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
-            htmlViewOptions.SpreadsheetOptions.SkipEmptyColumns = true;
-            htmlViewOptions.SpreadsheetOptions.SkipEmptyRows = true;
+            htmlViewOptions.SpreadsheetOptions.RenderGridLines = true;
+            htmlViewOptions.SpreadsheetOptions.TextOverflowMode = TextOverflowMode.HideText;
+
             SetWatermarkOptions(htmlViewOptions);
 
             if (passedPageNumber >= 0 && newAngle != 0)
