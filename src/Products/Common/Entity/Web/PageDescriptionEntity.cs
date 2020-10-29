@@ -28,6 +28,11 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         public int angle { get; set; }
 
         /// <summary>
+        /// Sheet name.
+        /// </summary>
+        public string sheetName { get; set; }
+
+        /// <summary>
         /// Page content data.
         /// </summary>
         [JsonProperty]
