@@ -33,6 +33,11 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
         [JsonProperty]
         private string data;
 
+        /// <summary>
+        /// Sheet name.
+        /// </summary>
+        public string sheetName { get; set; }
+
         public void SetData(string data)
         {
             this.data = data;

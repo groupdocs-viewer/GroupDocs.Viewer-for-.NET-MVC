@@ -435,6 +435,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 angle = 0,
                 height = currentAngle == 0 || currentAngle == 180 ? page.Height : page.Width,
                 width = currentAngle == 0 || currentAngle == 180 ? page.Width : page.Height,
+                sheetName = page.Name,
             };
 
             return pageDescriptionEntity;
