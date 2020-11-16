@@ -8,6 +8,10 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Entity.Web
     /// </summary>
     public class LoadDocumentEntity
     {
+        // Required to generate document thumbnail.
+        [JsonIgnore]
+        public byte[] PageStreamForThumbnail { get; set; }
+
         /// <summary>
         /// Document absolute path.
         /// </summary>

@@ -45,6 +45,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AdvancedStringBuilder, Version=0.1.0.0, Culture=neutral, PublicKeyToken=e818a2fc08933ddb, processorArchitecture=MSIL">
+      <HintPath>..\packages\AdvancedStringBuilder.0.1.0\lib\net45\AdvancedStringBuilder.dll</HintPath>
+    </Reference>
     <Reference Include="GroupDocs.Viewer, Version=20.7.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <HintPath>..\packages\GroupDocs.Viewer.20.7.0\lib\net20\GroupDocs.Viewer.dll</HintPath>
     </Reference>
@@ -58,6 +61,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.0.0\lib\netstandard1.1\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -137,6 +143,9 @@
       <Private>True</Private>
       <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="WebMarkupMin.Core, Version=2.8.6.0, Culture=neutral, PublicKeyToken=99472178d266584b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebMarkupMin.Core.2.8.6\lib\net45\WebMarkupMin.Core.dll</HintPath>
+    </Reference>
     <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\YamlDotNet.5.2.1\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
@@ -167,6 +176,8 @@
     <Compile Include="Products\Common\Util\Directory\IDirectoryUtils.cs" />
     <Compile Include="Products\Common\Util\Parser\YamlParser.cs" />
     <Compile Include="Products\Viewer\Cache\CacheExtensions.cs" />
+    <Compile Include="Products\Viewer\Cache\ViewerUtil.cs" />
+    <Compile Include="Products\Viewer\Cache\ExternalResourcesStreamFactory.cs" />
     <Compile Include="Products\Viewer\Cache\CrossProcessLock.cs" />
     <Compile Include="Products\Viewer\Cache\FileViewerCache.cs" />
     <Compile Include="Products\Viewer\Cache\ICustomViewer.cs" />

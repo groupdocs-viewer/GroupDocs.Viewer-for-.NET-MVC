@@ -21,6 +21,7 @@ using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Xml.Linq;
 using WebGrease.Css.Extensions;
+using LoadOptions = GroupDocs.Viewer.Options.LoadOptions;
 
 namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
 {
@@ -136,7 +137,10 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         {
             try
             {
-                LoadDocumentEntity loadDocumentEntity = GetDocumentPages(postedData, globalConfiguration.Viewer.GetPreloadPageCount() == 0);
+                LoadDocumentEntity loadDocumentEntity;
+                ViewerUtil viewer = new ViewerUtil();
+                ViewerUtil.GenerateCacheFor(postedData.guid, postedData.password);
+                loadDocumentEntity = ViewerUtil.GetCacheFor(postedData.guid);
 
                 // return document description
                 return this.Request.CreateResponse(HttpStatusCode.OK, loadDocumentEntity);
@@ -387,35 +391,35 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// </summary>
         /// <param name="loadDocumentRequest">Posted data with document guid.</param>
         /// <returns>Data of all document pages.</returns>
-        [HttpPost]
-        [Route("loadThumbnails")]
-        public LoadDocumentEntity GetPagesThumbnails(PostedDataEntity loadDocumentRequest)
-        {
-            return GetDocumentPages(loadDocumentRequest, true);
-        }
+        //[HttpPost]
+        //[Route("loadThumbnails")]
+        //public LoadDocumentEntity GetPagesThumbnails(PostedDataEntity loadDocumentRequest)
+        //{
+        //    return GetDocumentPages(loadDocumentRequest, true);
+        //}
 
         /// <summary>
         /// Loads print version.
         /// </summary>
         /// <param name="loadDocumentRequest">PostedDataEntity.</param>
         /// <returns>Data of all document pages.</returns>
-        [HttpPost]
-        [Route("loadPrint")]
-        public HttpResponseMessage GetPrintVersion(PostedDataEntity loadDocumentRequest)
-        {
-            try
-            {
-                LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true, true);
+        //[HttpPost]
+        //[Route("loadPrint")]
+        //public HttpResponseMessage GetPrintVersion(PostedDataEntity loadDocumentRequest)
+        //{
+        //    try
+        //    {
+        //        LoadDocumentEntity loadPrintDocument = GetDocumentPages(loadDocumentRequest, true, true);
 
-                // return document description
-                return this.Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
-            }
-            catch (Exception ex)
-            {
-                // set exception message
-                return this.Request.CreateResponse(HttpStatusCode.InternalServerError, Resources.GenerateException(ex, loadDocumentRequest.password));
-            }
-        }
+        //        // return document description
+        //        return this.Request.CreateResponse(HttpStatusCode.OK, loadPrintDocument);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // set exception message
+        //        return this.Request.CreateResponse(HttpStatusCode.InternalServerError, Resources.GenerateException(ex, loadDocumentRequest.password));
+        //    }
+        //}
 
         /// <summary>
         /// Gets page dimensions and rotation angle.
@@ -564,73 +568,40 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
         /// <param name="postedData">Posted data with document guid.</param>
         /// <param name="loadAllPages">Flag to load all pages.</param>
         /// <returns>Document pages data, dimensions and rotation angles.</returns>
-        private static LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages, bool printVersion = false)
-        {
-            // get/set parameters
-            string documentGuid = postedData.guid;
-            string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
+        //private static LoadDocumentEntity GetDocumentPages(PostedDataEntity postedData, bool loadAllPages, bool printVersion = false)
+        //{
+        //    // get/set parameters
+        //    string documentGuid = postedData.guid;
+        //    string password = string.IsNullOrEmpty(postedData.password) ? null : postedData.password;
 
-            var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
-            string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
+        //    var fileFolderName = Path.GetFileName(documentGuid).Replace(".", "_");
+        //    string fileCacheSubFolder = Path.Combine(cachePath, fileFolderName);
 
-            if (!File.Exists(documentGuid))
-            {
-                throw new GroupDocsViewerException("File not found.");
-            }
+        //    if (!File.Exists(documentGuid))
+        //    {
+        //        throw new GroupDocsViewerException("File not found.");
+        //    }
 
-            IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
+        //    IViewerCache cache = new FileViewerCache(cachePath, fileCacheSubFolder);
 
-            LoadDocumentEntity loadDocumentEntity;
-            if (globalConfiguration.Viewer.GetIsHtmlMode() && !printVersion)
-            {
-                using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password)))
-                {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, htmlViewer, printVersion);
-                }
-            }
-            else
-            {
-                using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password)))
-                {
-                    loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer, printVersion);
-                }
-            }
+        //    LoadDocumentEntity loadDocumentEntity;
+        //    if (globalConfiguration.Viewer.GetIsHtmlMode() && !printVersion)
+        //    {
+        //        using (HtmlViewer htmlViewer = new HtmlViewer(documentGuid, cache, GetLoadOptions(password)))
+        //        {
+        //            loadDocumentEntity = ViewerUtil.GetLoadDocumentEntity(GetLoadOptions(password), loadAllPages, documentGuid, fileCacheSubFolder, printVersion);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        using (PngViewer pngViewer = new PngViewer(documentGuid, cache, GetLoadOptions(password)))
+        //        {
+        //            loadDocumentEntity = GetLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, pngViewer, printVersion);
+        //        }
+        //    }
 
-            return loadDocumentEntity;
-        }
-
-        private static LoadDocumentEntity GetLoadDocumentEntity(bool loadAllPages, string documentGuid, string fileCacheSubFolder, ICustomViewer customViewer, bool printVersion)
-        {
-            if (loadAllPages)
-            {
-                customViewer.CreateCache();
-            }
-
-            dynamic viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
-            LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
-
-            if (!Directory.Exists(cachePath))
-            {
-                Directory.CreateDirectory(cachePath);
-            }
-
-            string pagesInfoPath;
-            TryCreatePagesInfoXml(fileCacheSubFolder, viewInfo, out pagesInfoPath);
-
-            foreach (Page page in viewInfo.Pages)
-            {
-                PageDescriptionEntity pageData = GetPageInfo(page, pagesInfoPath);
-                if (loadAllPages)
-                {
-                    pageData.SetData(GetPageContent(page.Number, documentGuid, cachePath, printVersion));
-                }
-
-                loadDocumentEntity.SetPages(pageData);
-            }
-
-            loadDocumentEntity.SetGuid(documentGuid);
-            return loadDocumentEntity;
-        }
+        //    return loadDocumentEntity;
+        //}
 
         private static void TryCreatePagesInfoXml(string fileCacheSubFolder, dynamic viewInfo, out string pagesInfoPath)
         {
