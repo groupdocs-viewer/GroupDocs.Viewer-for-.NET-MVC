@@ -606,7 +606,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Controllers
                 customViewer.CreateCache();
             }
 
-            dynamic viewInfo = customViewer.GetViewer().GetViewInfo(ViewInfoOptions.ForHtmlView());
+            dynamic viewInfo = customViewer.GetViewInfo();
             LoadDocumentEntity loadDocumentEntity = new LoadDocumentEntity();
 
             if (!Directory.Exists(cachePath))

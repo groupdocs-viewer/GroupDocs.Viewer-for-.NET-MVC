@@ -161,7 +161,7 @@ namespace GroupDocs.Viewer.MVC.Products.Viewer.Cache
             }
         }
 
-        private ViewInfo GetViewInfo()
+        public ViewInfo GetViewInfo()
         {
             string cacheKey = "view_info.dat";
 
