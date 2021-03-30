@@ -46,7 +46,7 @@ In order to demonstrate GroupDocs.Viewer for Java reach and powerful features we
 | Electronic publication      | `EPUB`,`MOBI`,`DJVU`                                                                                                                       |
 | Windows Icon                | `ICO`                                                                                                                              |
 | Medical image files         | `DCM` |
-| Programming Language Formats | `AS`, `AS3`, `ASM`, `BAT`, `C`, `CC`, `CMAKE`, `CPP`, `CS`,`VB`, `CSS`, `CXX`, `DIFF`, `ERB`, <br/> `GROOVY`, `H`,`HAML`, `HH`, `JAVA`, `JS`, `JSON`, `LESS`, `LOG`, `M`, `MAKE`, `MD`, `ML`, <br/> `MM`, `PHP`, `PL`, `PROPERTIES`, `PY`, `RB`, `RST`, `SASS`, `SCALA`, `SCM`, `SCRIPT` <br/>, `SH`, `SML`, `SQL`, `VIM`, `YAML`|                                                                                                                          | 
+| Programming Language Formats | `AS`, `AS3`, `ASM`, `BAT`, `C`, `CC`, `CMAKE`, `CPP`, `CS`,`VB`, `CSS`, `CXX`, `DIFF`, `ERB`, <br/> `GROOVY`, `H`,`HAML`, `HH`, `JAVA`, `JS`, `JSON`, `LESS`, `LOG`, `M`, `MAKE`, `MD`, `ML`, <br/> `MM`, `PHP`, `PL`, `PROPERTIES`, `PY`, `RB`, `RST`, `SASS`, `SCALA`, `SCM`, `SCRIPT`, <br/> `SH`, `SML`, `SQL`, `VIM`, `YAML`|                                                                                                                       | 
 
 ## Demo Video
 
