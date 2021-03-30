@@ -23,8 +23,8 @@ In order to demonstrate GroupDocs.Viewer for Java reach and powerful features we
 
 ## Supported document Formats
 
-| Family                      | Formats                                                                                                                            |
-| --------------------------- |:---------------------------------------------------------------------------------------------------------------------------------- |
+| Family                      | Formats                                                                                                                                     |
+| --------------------------- |:-------------------------------------------------------------------------------------------------------------------------------------------- |
 | Archive formats             | `ZIP`, `TAR`, `BZ2`, `RAR`, `GZIP`                                                                                                 |
 | Apple formats               | `Numbers` 																														   |
 | PDF formats                 | `PDF`, `XPS`, `OXPS`, `TEX`                                                                                                        |
@@ -42,11 +42,11 @@ In order to demonstrate GroupDocs.Viewer for Java reach and powerful features we
 | HyperText Markup Language   | `HTML`, `MHT`, `MHTML`, `SVG`,`SVGZ`                                                                                               |
 | Extensible Markup Language  | `XML`,`XML`, `XPS`                                                                                                                 |
 | AutoCAD Drawing File Format | `DGN`, `DWG`, `DXF`                                                                                                                |
-| Image files                 | `BMP`, `CAL`, `DCX`,`CGM`,`PCL`,`PSB`, `DIB`, `EMF`,`EMZ`,`WEBP`,`DNG`,`CDR`,`CMX`, `GIF`, `JP2`, `JPG`,`JPF`,`JPM`,`J2C`,`J2K`,`JPC`,`JPX`,`MIL`, `MIL`, `PCD`, `PCT`, `PCX`, `PNG`,`Animated PNG`, `PSD`,`PS`, `RAS`, `TGA`,`TIFF`,`WMF`,`WMZ`,`EPS`, `AI`  |
+| Image files                 | `BMP`, `CAL`, `DCX`,`CGM`,`PCL`,`PSB`, `DIB`, `EMF`,`EMZ`,`WEBP`,`DNG`,`CDR`,`CMX`, `GIF`, <br/> `JP2`,                                    `JPG`,`JPF`,`JPM`,`J2C`,`J2K`,`JPC`,`JPX`,`MIL`, `MIL`, `PCD`, `PCT`, `PCX`, `PNG`, <br/>`Animated PNG`, `PSD`,`PS`, `RAS`, `TGA`,`TIFF`,`WMF`,`WMZ`,`EPS`, `AI`  |
 | Electronic publication      | `EPUB`,`MOBI`,`DJVU`                                                                                                                       |
 | Windows Icon                | `ICO`                                                                                                                              |
-| Medical image files         | `DCM`
-| Programming Language Formats | `AS`, `AS3`, `ASM`, `BAT`, `C`, `CC`, `CMAKE`, `CPP`, `CS`,`VB`, `CSS`, `CXX`, `DIFF`, `ERB`, `GROOVY`, `H`, `HAML`, `HH`, `JAVA`, `JS`, `JSON`, `LESS`, `LOG`, `M`, `MAKE`, `MD`, `ML`, `MM`, `PHP`, `PL`, `PROPERTIES`, `PY`, `RB`, `RST`, `SASS`, `SCALA`, `SCM`, `SCRIPT`, `SH`, `SML`, `SQL`, `VIM`, `YAML`                                                                                                                          | 
+| Medical image files         | `DCM` |
+| Programming Language Formats | `AS`, `AS3`, `ASM`, `BAT`, `C`, `CC`, `CMAKE`, `CPP`, `CS`,`VB`, `CSS`, `CXX`, `DIFF`, `ERB`, <br/> `GROOVY`, `H`,`HAML`, `HH`, `JAVA`, `JS`, `JSON`, `LESS`, `LOG`, `M`, `MAKE`, `MD`, `ML`, <br/> `MM`, `PHP`, `PL`, `PROPERTIES`, `PY`, `RB`, `RST`, `SASS`, `SCALA`, `SCM`, `SCRIPT` <br/>, `SH`, `SML`, `SQL`, `VIM`, `YAML`|                                                                                                                          | 
 
 ## Demo Video
 
