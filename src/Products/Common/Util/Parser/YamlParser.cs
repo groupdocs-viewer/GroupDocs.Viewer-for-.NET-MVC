@@ -11,7 +11,7 @@ namespace GroupDocs.Viewer.MVC.Products.Common.Util.Parser
     public class YamlParser
     {
         private static string YamlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configuration.yml");
-        private dynamic ConfiguationData;
+        private readonly dynamic ConfiguationData;
 
         public YamlParser()
         {
