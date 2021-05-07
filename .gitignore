@@ -31,3 +31,6 @@ src/DocumentSamples
 
 # Finder in OSX
 .DS_Store
+
+#License files
+.lic
